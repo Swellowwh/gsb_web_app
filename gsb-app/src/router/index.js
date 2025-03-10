@@ -42,7 +42,13 @@ const router = createRouter({
           name: 'Historique',
           component: () => import('../views/Historique.vue'),
           meta: { requiresAuth: true }
-        }
+        },
+        {
+          path: '/administration',
+          name: 'admin',
+          component: () => import('../views/Administration.vue'),
+          meta: { requiresAuth: true },
+        },
       ]
     },
     { path: '/:pathMatch(.*)*', name: '404', component: () => import('../views/404.vue') }

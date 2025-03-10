@@ -123,27 +123,44 @@ const logout = async () => {
             </ul>
         </nav>
 
-        <div class="w-full px-6 py-4">
-            <div class="flex items-center gap-x-4 mb-3">
-                <div
-                    class="size-12 rounded-full border-2 border-pink-500/30 flex items-center justify-center bg-gradient-to-br from-pink-600 to-pink-900 text-white font-medium shadow-lg text-base transition-all duration-300 hover:scale-105 hover:shadow-pink-600/20 hover:shadow-lg">
-                    {{ getUserInitials }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <span class="block truncate font-semibold text-base text-white">
-                        {{ userStore.userData?.username || 'Utilisateur' }}
-                    </span>
-                    <span class="text-xs font-medium text-pink-300/80">
-                        {{ formattedRole }}
-                    </span>
-                </div>
-            </div>
+        <!-- Section profil utilisateur -->
+        <div class="w-full bg-gray-900/50">
+            <div class="bg-gray-800/30 rounded-xl p-3 backdrop-blur-sm border border-pink-800/20">
+                <div class="flex items-center gap-x-4 mb-3">
+                    <div class="relative">
+                        <div
+                            class="size-12 rounded-full border-2 border-pink-500/30 flex items-center justify-center bg-gradient-to-br from-pink-600 to-pink-900 text-white font-medium shadow-lg text-base transition-all duration-300 hover:scale-105 hover:shadow-pink-600/20 hover:shadow-lg">
+                            {{ getUserInitials }}
+                        </div>
+                        <!-- Indicateur en ligne -->
+                        <span
+                            class="absolute bottom-0 right-0 size-3 rounded-full bg-green-500 ring-2 ring-gray-900"></span>
+                    </div>
 
-            <button @click.prevent="logout()"
-                class="w-full mt-2 py-2.5 px-4 text-sm bg-pink-800 rounded-md text-white shadow-md transition-all duration-200 flex items-center justify-center gap-x-2 border border-pink-800/40 hover:shadow-lg hover:bg-pink-700">
-                <ArrowRightOnRectangleIcon class="size-5" />
-                Déconnexion
-            </button>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <span class="block truncate font-semibold text-base text-white">
+                                {{ userStore.userData?.username || 'Utilisateur' }}
+                            </span>
+                            <!-- Statut en ligne -->
+                            <span
+                                class="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20">
+                                En ligne
+                            </span>
+                        </div>
+                        <span class="text-xs font-medium text-pink-300/80">
+                            {{ formattedRole }}
+                        </span>
+                    </div>
+                </div>
+
+                <button @click.prevent="logout()"
+                    class="w-full py-2.5 px-4 text-sm bg-pink-800 rounded-lg text-white shadow-md transition-all duration-200 flex items-center justify-center gap-x-2 border border-pink-800/40 hover:shadow-lg hover:bg-pink-700 group">
+                    <ArrowRightOnRectangleIcon
+                        class="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                    Déconnexion
+                </button>
+            </div>
         </div>
     </div>
 </template>
