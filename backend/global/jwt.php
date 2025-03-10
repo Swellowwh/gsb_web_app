@@ -2,6 +2,12 @@
 require_once 'vendor/autoload.php';
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
+use Dotenv\Dotenv;
+
+// Chargement des variables d'environnement
+// Adaptez le chemin selon l'emplacement de votre fichier .env
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv->load();
 
 /**
  * Classe utilitaire pour la gestion des tokens JWT
@@ -10,10 +16,20 @@ use \Firebase\JWT\Key;
 class JwtUtils
 {
     // Configuration
-    private static $secret_key = 'test298449824t89re4t892s4t';
     private static $algorithm = 'HS256';
     private static $expiration = 3600; // 1 heure en secondes
     private static $cookie_name = 'gsb_session';
+
+    /**
+     * Récupère la clé secrète depuis les variables d'environnement
+     * 
+     * @return string Clé secrète
+     */
+    private static function getSecretKey()
+    {
+        $secret = $_ENV['JWT_CONTROL']; // Fallback si non définie
+        return $secret;
+    }
 
     /**
      * Génère un token JWT pour un utilisateur
@@ -33,7 +49,7 @@ class JwtUtils
         ], $userData);
 
         // Encodage du token
-        return JWT::encode($payload, self::$secret_key, self::$algorithm);
+        return JWT::encode($payload, self::getSecretKey(), self::$algorithm);
     }
 
     /**
@@ -81,7 +97,7 @@ class JwtUtils
     {
         try {
             // Décodage du token
-            $decoded = JWT::decode($token, new Key(self::$secret_key, self::$algorithm));
+            $decoded = JWT::decode($token, new Key(self::getSecretKey(), self::$algorithm));
             
             // Conversion en tableau
             $userData = (array) $decoded;

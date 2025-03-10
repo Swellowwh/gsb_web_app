@@ -6,8 +6,13 @@ require_once './global/jwt.php';
 require_once 'vendor/autoload.php';
 
 use \Firebase\JWT\JWT;
+use Dotenv\Dotenv;
 
 try {
+    // Chargement des variables d'environnement
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+    $dotenv->load();
+    
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
         echo json_encode(['success' => false, 'message' => 'Méthode non autorisée. Utilisez POST.']);
@@ -43,7 +48,13 @@ try {
     }
 
     // Création du token JWT
-    $secret_key = "test298449824t89re4t892s4t";
+    $secret_key = $_ENV['JWT_CONTROL'];
+    
+    // Vérification que la clé JWT est bien chargée
+    if (!$secret_key) {
+        throw new Exception('La clé JWT_CONTROL n\'est pas définie dans les variables d\'environnement');
+    }
+    
     $expiration = time() + 86400; // 24 heures
     
     $payload = [
