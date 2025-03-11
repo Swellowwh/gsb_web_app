@@ -37,7 +37,7 @@ if (!$user || $user['role'] !== 'ADMINISTRATEUR') {
 }
 
 // Si l'utilisateur est administrateur, récupérer la liste des visiteurs
-$stmt = $pdo->prepare("SELECT VIS_ID, VIS_NOM, VIS_PRENOM, VIS_ADRESSE, VIS_CP, VIS_VILLE, VIS_DATE_EMBAUCHE FROM visiteur");
+$stmt = $pdo->prepare("SELECT EMP_ID, EMP_NOM, EMP_PRENOM, EMP_ADRESSE, EMP_CP, EMP_VILLE, EMP_ROLE, EMP_DATE_EMBAUCHE FROM employe");
 $stmt->execute();
 $visiteurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

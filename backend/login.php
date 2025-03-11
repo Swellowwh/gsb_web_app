@@ -21,8 +21,8 @@ try {
 
     // Récupération des données frontend
     $input = json_decode(file_get_contents('php://input'), true);
-    $username = isset($input['username']) ? trim($input['username']) : '';
-    $password = isset($input['password']) ? $input['password'] : '';
+    $username = trim($input['username'] ?? '');
+    $password = $input['password'] ?? '';
 
     // Vérification des entrées
     if (empty($username) || empty($password)) {

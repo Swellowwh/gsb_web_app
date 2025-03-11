@@ -18,35 +18,35 @@ const checkSession = async () => {
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/',
-      name: 'dashboard',
-      component: () => import('../views/Dashboard.vue'),
-      meta: { requiresAuth: true },
-    },
     { path: '/login', name: 'login', component: () => import('../views/LoginView.vue'), },
     {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue'),
+      path: '/',
+      name: 'home',
+      component: () => import('../views/HomeView.vue'),
       meta: { requiresAuth: true },
       children: [
         {
-          path: 'frais',
+          path: '/frais',
           name: 'Frais',
           component: () => import('../views/Frais.vue'),
           meta: { requiresAuth: true }
         },
         {
-          path: 'historique',
+          path: '/historique',
           name: 'Historique',
           component: () => import('../views/Historique.vue'),
           meta: { requiresAuth: true }
         },
         {
-          path: '/administration',
-          name: 'admin',
-          component: () => import('../views/Administration.vue'),
+          path: '/employees',
+          name: 'Employees',
+          component: () => import('../views/Employees.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: '/payments',
+          name: 'Payments',
+          component: () => import('../views/Payments.vue'),
           meta: { requiresAuth: true },
         },
       ]

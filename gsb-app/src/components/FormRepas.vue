@@ -63,14 +63,14 @@ const soumettreFormulaire = () => {
                     </svg>
                 </div>
                 <input type="date" v-model="fraisData.date"
-                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50">
+                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
             </div>
         </div>
 
         <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">Type de repas</label>
             <select v-model="fraisData.type"
-                class="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50">
+                class="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                 <option value="Déjeuner">Déjeuner</option>
                 <option value="Dîner">Dîner</option>
                 <option value="Petit-déjeuner">Petit-déjeuner</option>
@@ -81,7 +81,7 @@ const soumettreFormulaire = () => {
             <label class="block text-sm font-medium text-gray-700">Montant (€)</label>
             <div class="relative rounded-lg shadow-sm">
                 <input type="number" step="0.01" v-model="fraisData.montant"
-                    class="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
+                    class="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     placeholder="Ex: 25.50">
                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <span class="text-gray-500 sm:text-sm">€</span>
@@ -102,7 +102,7 @@ const soumettreFormulaire = () => {
                     </svg>
                 </div>
                 <input type="text" v-model="fraisData.lieu"
-                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
+                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     placeholder="Nom et ville du restaurant">
             </div>
         </div>
@@ -110,13 +110,13 @@ const soumettreFormulaire = () => {
         <div class="md:col-span-2 space-y-2">
             <label class="block text-sm font-medium text-gray-700">Contexte du repas</label>
             <textarea v-model="fraisData.contexte" rows="3"
-                class="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
+                class="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 placeholder="Contexte du repas (visite client, formation, réunion d'équipe, etc.)"></textarea>
         </div>
 
         <div v-if="fraisData.montant" class="md:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div class="flex items-center mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-600 mr-2" fill="none"
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600 mr-2" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -133,7 +133,7 @@ const soumettreFormulaire = () => {
                         </span>
                     </p>
                 </div>
-                <div class="text-xl font-bold" :class="parseFloat(fraisData.montant) > getPlafond(fraisData.type) ? 'text-red-600' : 'text-pink-600'">
+                <div class="text-xl font-bold" :class="parseFloat(fraisData.montant) > getPlafond(fraisData.type) ? 'text-red-600' : 'text-indigo-600'">
                     {{ parseFloat(fraisData.montant).toFixed(2) }}€
                 </div>
             </div>
@@ -144,11 +144,11 @@ const soumettreFormulaire = () => {
 
         <div class="md:col-span-2 flex justify-end space-x-4 pt-4">
             <button type="button" @click="reinitialiserFormulaire"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 Annuler
             </button>
             <button type="submit" @click.prevent="soumettreFormulaire"
-                class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center">
+                class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

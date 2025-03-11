@@ -2,6 +2,7 @@
 import { onMounted, provide, ref, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
+import Notification from '@/components/Notification.vue';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -10,7 +11,6 @@ const isLoggedIn = ref(false);
 const userData = ref(null);
 const isLoading = ref(true);
 
-// Cette fonction vérifie la session et charge les données utilisateur
 const checkSession = async () => {
   try {
     isLoading.value = true;
@@ -57,12 +57,10 @@ onMounted(async () => {
 // Surveiller les changements d'état de connexion
 watch(isLoggedIn, (newValue) => {
   if (!newValue && !isLoading.value) {
-    // Rediriger vers login si l'utilisateur se déconnecte
     router.push('/login');
   }
 });
 
-// Rendre ces valeurs disponibles à tous les composants enfants
 provide('isLoggedIn', isLoggedIn);
 provide('userData', userData);
 provide('isLoading', isLoading);
@@ -74,6 +72,7 @@ provide('checkSession', checkSession);
     <div class="loading-spinner"></div>
   </div>
   <RouterView v-else />
+  <Notification />
 </template>
 
 <style scoped>
