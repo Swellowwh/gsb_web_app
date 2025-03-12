@@ -11,9 +11,14 @@ const isLoggedIn = ref(false);
 const userData = ref(null);
 const isLoading = ref(true);
 
+// Timer pour garantir une durée minimale d'affichage du chargement
+const minLoadingTime = 3000; // 3 secondes minimum
+let loadingStartTime;
+
 const checkSession = async () => {
   try {
     isLoading.value = true;
+    loadingStartTime = Date.now();
     
     const response = await fetch("http://51.83.76.210/gsb/backend/checkSession.php", {
       method: "POST",
@@ -45,7 +50,18 @@ const checkSession = async () => {
     router.push('/login');
     return false;
   } finally {
-    isLoading.value = false;
+    // Calculer le temps écoulé depuis le début du chargement
+    const elapsedTime = Date.now() - loadingStartTime;
+    const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+    
+    // Si le temps minimum n'est pas atteint, attendre avant de masquer le loader
+    if (remainingTime > 0) {
+      setTimeout(() => {
+        isLoading.value = false;
+      }, remainingTime);
+    } else {
+      isLoading.value = false;
+    }
   }
 };
 
@@ -69,7 +85,12 @@ provide('checkSession', checkSession);
 
 <template>
   <div v-if="isLoading" class="loading-container">
-    <div class="loading-spinner"></div>
+    <div class="gsb-title">
+      <span>G</span>
+      <span>S</span>
+      <span>B</span>
+    </div>
+    <div class="loader"></div>
   </div>
   <RouterView v-else />
   <Notification />
@@ -78,23 +99,86 @@ provide('checkSession', checkSession);
 <style scoped>
 .loading-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
   width: 100vw;
+  background-color: #f5f5f5;
 }
 
-.loading-spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top: 4px solid #3498db;
-  width: 40px;
+.gsb-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.1em;
+  color: #4f46e5;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.gsb-title span {
+  display: inline-block;
+  animation: letterFloat 2s infinite ease-in-out;
+}
+
+.gsb-title span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.gsb-title span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.gsb-title span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes letterFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    text-shadow: 0 0 0 rgba(79, 70, 229, 0);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.1);
+    text-shadow: 0 10px 10px rgba(79, 70, 229, 0.2);
+  }
+}
+
+.loader {
+  width: 90px;
   height: 40px;
-  animation: spin 1s linear infinite;
+  --g: radial-gradient(circle, #0000 60%, #4f46e5 62%, #6366f1 68%, #0000 72%) no-repeat;
+  background: var(--g), var(--g), var(--g);
+  background-size: 24px 24px;
+  position: relative;
+  animation: loaderAnimation 1.2s infinite ease-in-out;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes loaderAnimation {
+  0% {
+    background-position: 0 50%, 50% 50%, 100% 50%;
+    transform: scale(0.95);
+  }
+  20% {
+    background-position: 0 30%, 50% 50%, 100% 50%;
+    transform: scale(1);
+  }
+  40% {
+    background-position: 0 70%, 50% 30%, 100% 50%;
+    transform: scale(0.98);
+  }
+  60% {
+    background-position: 0 50%, 50% 70%, 100% 30%;
+    transform: scale(1);
+  }
+  80% {
+    background-position: 0 50%, 50% 50%, 100% 70%;
+    transform: scale(0.95);
+  }
+  100% {
+    background-position: 0 50%, 50% 50%, 100% 50%;
+    transform: scale(1);
+  }
 }
 </style>

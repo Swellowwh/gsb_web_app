@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import { useNotificationService } from '@/services/notification/notification';
+const { NotifSuccess } = useNotificationService();
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -45,9 +47,8 @@ const login = async () => {
 
     console.log(data);
 
-    isLoggedIn.value = true;
     userStore.setUser(data.user);
-    showNotification('Connexion réussie');
+    NotifSuccess('Connexion réussie');
 
     router.push('/');
   } catch (error) {
@@ -75,14 +76,9 @@ const register = async () => {
     const data = await response.json();
     if (!data.success) throw new Error(data.message || 'Erreur d\'inscription');
 
-    showNotification('Utilisateur créé avec succès');
+    NotifSuccess('Utilisateur créé avec succès');
     showLoginForm.value = true;
     username.value = registerUsername.value;
-    
-    // Réinitialisation des champs
-    registerUsername.value = '';
-    registerPassword.value = '';
-
   } catch (error) {
     errorMessage.value = error.message;
   } finally {

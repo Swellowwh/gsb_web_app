@@ -1,5 +1,22 @@
+// src/App.vue
 <script setup>
 import Sidebar from '@/components/Sidebar.vue';
+import { useUserStore } from '@/stores/user';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const userStore = useUserStore();
+const router = useRouter();
+
+onMounted(() => {
+  if (router.currentRoute.value.path === '/') {
+    if (userStore.userData.role === 'ADMINISTRATEUR') {
+      router.push('/employees');
+    } else {
+      router.push('/frais');
+    }
+  }
+});
 </script>
 
 <template>
@@ -9,8 +26,8 @@ import Sidebar from '@/components/Sidebar.vue';
     </div>
 
     <div class="flex-1 flex flex-col overflow-auto">
-        <div class="w-full mx-auto">
-            <router-view />
+      <div class="w-full mx-auto">
+        <router-view />
       </div>
     </div>
   </div>

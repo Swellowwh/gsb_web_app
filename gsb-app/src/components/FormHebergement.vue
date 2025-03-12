@@ -112,7 +112,6 @@ const calculerNbNuits = () => {
 
 <template>
     <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Dates d'arrivée et de départ -->
         <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">Date d'arrivée</label>
             <div class="relative">
@@ -128,73 +127,6 @@ const calculerNbNuits = () => {
             </div>
         </div>
 
-        <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Date de départ</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <input type="date" v-model="fraisData.dateDepart" @change="calculerNbNuits"
-                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            </div>
-        </div>
-
-        <!-- Établissement et localisation -->
-        <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Établissement</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                </div>
-                <input type="text" v-model="fraisData.etablissement"
-                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    placeholder="Nom de l'hôtel">
-            </div>
-        </div>
-
-        <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Ville</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </div>
-                <input type="text" v-model="fraisData.ville"
-                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    placeholder="Ville">
-            </div>
-        </div>
-
-        <div class="md:col-span-2 space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Adresse complète</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                </div>
-                <input type="text" v-model="fraisData.adresse"
-                    class="pl-10 w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    placeholder="Adresse complète de l'établissement">
-            </div>
-        </div>
-
-        <!-- Détails du séjour -->
         <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">Nombre de nuits</label>
             <input type="number" min="1" v-model="fraisData.nbNuits"
@@ -215,31 +147,6 @@ const calculerNbNuits = () => {
             <p v-if="depassePlafond" class="mt-1 text-xs text-red-600">
                 Ce montant dépasse le plafond autorisé de 120€ par nuit.
             </p>
-        </div>
-
-        <!-- Options supplémentaires -->
-        <div class="space-y-4">
-            <div class="flex items-start">
-                <div class="flex items-center h-5">
-                    <input id="petit-dejeuner" type="checkbox" v-model="fraisData.petitDejeuner"
-                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div class="ml-3 text-sm">
-                    <label for="petit-dejeuner" class="font-medium text-gray-700">Petit-déjeuner inclus</label>
-                </div>
-            </div>
-            
-            <div v-if="fraisData.petitDejeuner" class="pl-7">
-                <label class="block text-sm font-medium text-gray-700">Prix par petit-déjeuner (€)</label>
-                <div class="relative rounded-lg shadow-sm">
-                    <input type="number" step="0.01" v-model="fraisData.montantPetitDejeuner"
-                        class="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                        placeholder="Ex: 15.00">
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <span class="text-gray-500 sm:text-sm">€</span>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="space-y-4">
@@ -266,7 +173,6 @@ const calculerNbNuits = () => {
             </div>
         </div>
 
-        <!-- Raison du séjour -->
         <div class="md:col-span-2 space-y-2">
             <label class="block text-sm font-medium text-gray-700">Motif du séjour</label>
             <textarea v-model="fraisData.raison" rows="3"
@@ -274,7 +180,6 @@ const calculerNbNuits = () => {
                 placeholder="Raison du déplacement (visite client, salon professionnel, formation, etc.)"></textarea>
         </div>
 
-        <!-- Récapitulatif -->
         <div v-if="montantTotal > 0" class="md:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div class="flex items-center mb-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600 mr-2" fill="none"
@@ -312,7 +217,6 @@ const calculerNbNuits = () => {
             </div>
         </div>
 
-        <!-- Boutons d'action -->
         <div class="md:col-span-2 flex justify-end space-x-4 pt-4">
             <button type="button" @click="reinitialiserFormulaire"
                 class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">

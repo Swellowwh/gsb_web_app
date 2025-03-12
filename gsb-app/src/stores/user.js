@@ -18,5 +18,12 @@ export const useUserStore = defineStore('user', () => {
     };
   }
 
-  return { userData, username, role, setUser };
+  function reset() {
+    userData.value = {
+      username: '',
+      role: ''
+    };
+  }
+
+  return { userData, username, role, setUser, reset };
 });

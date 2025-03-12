@@ -94,14 +94,18 @@ const logout = async () => {
         });
 
         const data = await response.json();
+        console.log("Réponse du serveur:", data);
 
         if (data.success) {
+            userStore.reset();
             router.push('/login');
             return true;
         } else {
+            console.error('Échec de déconnexion:', data.message || 'Raison inconnue');
             return false;
         }
     } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
         return false;
     }
 };
@@ -109,7 +113,6 @@ const logout = async () => {
 
 <template>
     <div class="h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-indigo-800 overflow-hidden relative">
-        <!-- Logo header -->
         <div class="relative z-10 w-full">
             <div class="flex items-center justify-center h-20 px-4">
                 <h1 class="text-white text-4xl font-bold tracking-widest">
@@ -118,7 +121,6 @@ const logout = async () => {
             </div>
         </div>
 
-        <!-- Navigation menu -->
         <nav class="flex-1 overflow-y-auto px-6 py-6 relative z-10">
             <div class="mb-6">
                 <ul role="list" class="flex flex-col gap-y-1.5">
@@ -139,17 +141,14 @@ const logout = async () => {
             </div>
         </nav>
 
-        <!-- Profil utilisateur amélioré -->
         <div class="w-full bg-gray-900/60 backdrop-blur-md relative z-10">
             <div class="p-4">
                 <div class="flex items-center gap-x-4 relative">
-                    <!-- Avatar avec les initiales -->
                     <div @click="showProfileMenu = !showProfileMenu"
                         class="size-12 rounded-full border-2 border-indigo-400 flex items-center justify-center bg-indigo-700 text-white font-medium shadow-lg text-base transition-all duration-300 cursor-pointer hover:bg-indigo-600">
                         {{ getUserInitials }}
                     </div>
 
-                    <!-- Informations utilisateur -->
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between">
                             <span class="block truncate text-base text-white font-medium">
@@ -161,43 +160,12 @@ const logout = async () => {
                         </span>
                     </div>
 
-                    <!-- Bouton de déconnexion avec effet hover -->
                     <button @click="logout()" 
                         class="p-2 rounded-full hover:bg-red-500/20 transition-all duration-300 group">
                         <ArrowRightOnRectangleIcon class="h-5 w-5 text-red-400 group-hover:text-red-300" />
                     </button>
                 </div>
-
-                <!-- Menu déroulant du profil (optionnel) -->
-                <div v-if="showProfileMenu" 
-                    class="absolute bottom-full left-4 mb-2 w-48 bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700 transition-all duration-300">
-                    <div class="p-3 border-b border-gray-700">
-                        <div class="text-sm font-medium text-white">{{ userStore.userData?.username }}</div>
-                        <div class="text-xs text-gray-400">{{ userStore.userData?.email || 'Email non disponible' }}</div>
-                    </div>
-                    <div class="py-1">
-                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                            <UserIcon class="mr-3 h-4 w-4 text-gray-400" />
-                            Profil
-                        </a>
-                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                            <Cog6ToothIcon class="mr-3 h-4 w-4 text-gray-400" />
-                            Paramètres
-                        </a>
-                        <button @click="logout()" class="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-gray-700">
-                            <ArrowRightOnRectangleIcon class="mr-3 h-4 w-4" />
-                            Déconnexion
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-/* Animation pour le menu déroulant */
-.absolute {
-    transition: opacity 0.3s, transform 0.3s;
-}
-</style>
