@@ -13,42 +13,66 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $token = JwtUtils::getToken();
 
 if (!$token) {
-    throw new Exception('Aucun token trouvé');
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Aucun token trouvé']);
+    exit;
 }
 
-// Décodage manuel du token pour voir son contenu
-$tokenParts = explode('.', $token);
-if (count($tokenParts) != 3) {
-    throw new Exception('Format de token invalide');
+try {
+    $userData = JwtUtils::decodeToken($token);
+
+    if (!$userData) {
+        throw new Exception('Token invalide ou expiré lors de la vérification');
+    }
+
+    $userId = $userData['user_id'];
+
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (!$input) {
+        throw new Exception('Données JSON invalides');
+    }
+
+    $date = trim($input['date'] ?? '');
+    $distance = floatval($input['distance'] ?? 0);
+    $description = trim($input['description'] ?? '');
+
+    if (empty($date) || empty($distance) || empty($description)) {
+        throw new Exception('Tous les champs sont obligatoires');
+    }
+
+    $database = Database::getInstance();
+    $pdo = $database->getPDO();
+
+    $tauxStmt = $pdo->prepare("SELECT T_MONTANT FROM taux_frais WHERE T_ID = 'Km'");
+    $tauxStmt->execute();
+    $tauxKm = $tauxStmt->fetchColumn();
+    
+    $montant = $distance * $tauxKm;
+
+    $stmt = $pdo->prepare("INSERT INTO fiche_frais (TYPE, DATE, DESCRIPTION, MONTANT, user_id) 
+                          VALUES (:type, :date, :description, :montant, :userId)");
+                          
+    $type = 'Km';
+    $stmt->bindParam(':type', $type, PDO::PARAM_STR);
+    $stmt->bindParam(':date', $date, PDO::PARAM_STR);
+    $stmt->bindParam(':description', $description, PDO::PARAM_STR);
+    $stmt->bindParam(':montant', $montant, PDO::PARAM_STR);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+
+    $success = $stmt->execute();
+
+    if ($success) {
+        echo json_encode(['success' => true, 'message' => 'Frais kilométriques ajoutés avec succès']);
+    } else {
+        $errorInfo = $stmt->errorInfo();
+        throw new Exception('Erreur lors de l\'ajout des frais kilométriques: ' . $errorInfo[2]);
+    }
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Erreur de base de données: ' . $e->getMessage()]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
-
-$payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $tokenParts[1])), true);
-
-$userData = JwtUtils::decodeToken($token);
-
-if (!$userData) {
-    throw new Exception('Token invalide ou expiré lors de la vérification');
-}
-
-$userId = $userData['user_id'];
-
-$input = json_decode(file_get_contents('php://input'), true);
-
-$date = trim($input['date'] ?? '');
-$distance = trim($input['distance'] ?? '');
-$description = trim($input['description'] ?? '');
-
-$database = Database::getInstance();
-$pdo = $database->getPDO();
-
-$stmt = $pdo->prepare("INSERT INTO fiche_frais (TYPE, DATE, DESCRIPTION, MONTANT, EMP_ID, TAUX_ID) 
-                      VALUES (:type, :date, :description, 
-                      :nombre_km * (SELECT T_MONTANT FROM taux_frais WHERE T_ID = :taux_id), 
-                      :emp_id, :taux_id)");
-$stmt->bindParam(':type', 'Km', PDO::PARAM_STR);
-$stmt->bindParam(':date', $date, PDO::PARAM_STR);
-$stmt->bindParam(':description', $description, PDO::PARAM_STR);
-$stmt->bindParam(':distance', $distance, PDO::PARAM_INT);
-$stmt->bindParam(':taux_id', 'Km', PDO::PARAM_STR);
-$stmt->bindParam(':emp_id', $userId, PDO::PARAM_INT);
-$success = $stmt->execute();
+?>

@@ -12,8 +12,8 @@ import {
     BanknotesIcon,
     UserGroupIcon,
     CalendarIcon,
-    DocumentTextIcon,
-    ChartBarIcon,
+    DocumentPlusIcon,
+    ClockIcon,
     ArrowRightOnRectangleIcon,
     Cog6ToothIcon,
     UserIcon,
@@ -21,15 +21,15 @@ import {
 } from '@heroicons/vue/24/solid';
 
 // Déterminer le rôle de l'utilisateur
-const isVisiteurMedical = computed(() => 
+const isVisiteurMedical = computed(() =>
     userStore.userData?.role?.toUpperCase() === 'VISITEUR_MEDICAL'
 );
 
-const isComptable = computed(() => 
+const isComptable = computed(() =>
     userStore.userData?.role?.toUpperCase() === 'COMPTABLE'
 );
 
-const isAdministrateur = computed(() => 
+const isAdministrateur = computed(() =>
     userStore.userData?.role?.toUpperCase() === 'ADMINISTRATEUR'
 );
 
@@ -44,9 +44,30 @@ const comptableNavigation = [
 ];
 
 const administrateurNavigation = [
-    { name: 'Liste des employés', path: '/employees', icon: UserGroupIcon, current: computed(() => route.path === '/employees') },
-    { name: 'Fiche de frais', path: '/frais', icon: DocumentTextIcon, current: computed(() => route.path === '/frais') },
-    { name: 'Mise en paiement', path: '/payments', icon: CreditCardIcon, current: computed(() => route.path === '/payments') },
+    {
+        name: 'Liste des employés',
+        path: '/employees',
+        icon: UserGroupIcon,
+        current: computed(() => route.path === '/employees')
+    },
+    {
+        name: 'Ajouter une fiche',
+        path: '/frais',
+        icon: DocumentPlusIcon,
+        current: computed(() => route.path === '/frais')
+    },
+    {
+        name: 'Historique des fiches',
+        path: '/historique',
+        icon: ClockIcon,
+        current: computed(() => route.path === '/historique')
+    },
+    {
+        name: 'Mise en paiement',
+        path: '/payments',
+        icon: CreditCardIcon,
+        current: computed(() => route.path === '/payments')
+    },
 ];
 
 // Utiliser la navigation appropriée selon le rôle
@@ -160,7 +181,7 @@ const logout = async () => {
                         </span>
                     </div>
 
-                    <button @click="logout()" 
+                    <button @click="logout()"
                         class="p-2 rounded-full hover:bg-red-500/20 transition-all duration-300 group">
                         <ArrowRightOnRectangleIcon class="h-5 w-5 text-red-400 group-hover:text-red-300" />
                     </button>

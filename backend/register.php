@@ -12,13 +12,13 @@ try {
 
     // Récupération des données JSON envoyées
     $input = json_decode(file_get_contents('php://input'), true);
-    $username = isset($input['username']) ? trim($input['username']) : '';
+    $email = isset($input['email']) ? trim($input['email']) : '';
     $password = isset($input['password']) ? $input['password'] : '';
 
     // Vérification des entrées
-    if (strlen($username) < 3 || strlen($password) < 6) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Le nom d\'utilisateur doit avoir au moins 3 caractères et le mot de passe au moins 6 caractères.']);
+        echo json_encode(['success' => false, 'message' => 'Veuillez saisir une adresse email valide et un mot de passe d\'au moins 6 caractères.']);
         exit;
     }
 
@@ -26,8 +26,8 @@ try {
     $pdo = $database->getPDO();
 
     // Vérifier si l'utilisateur existe déjà
-    $stmt = $pdo->prepare("SELECT id FROM user WHERE username = :username");
-    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt = $pdo->prepare("SELECT id FROM user WHERE email = :email");
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->execute();
 
     if ($stmt->fetch()) {
@@ -40,8 +40,8 @@ try {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
     // Insérer le nouvel utilisateur
-    $stmt = $pdo->prepare("INSERT INTO user (username, password) VALUES (:username, :password)");
-    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt = $pdo->prepare("INSERT INTO user (email, password) VALUES (:email, :password)");
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
 
     if ($stmt->execute()) {

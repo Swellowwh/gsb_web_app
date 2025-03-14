@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useNotificationService } from '@/services/notification/notification';
 
 const isValidDate = (dateString) => {
@@ -27,6 +27,9 @@ const codePostal = ref('');
 const ville = ref('');
 const dateEmbauche = ref('');
 const role = ref('');
+const selectedUserId = ref('');
+const availableEmails = ref([]);
+const isLoadingEmails = ref(false);
 const error = ref(null);
 const isSubmitting = ref(false);
 
@@ -34,6 +37,41 @@ const roles = [
   { id: 'visiteur', label: 'Visiteur médical' },
   { id: 'comptable', label: 'Comptable' },
 ];
+
+onMounted(() => {
+  fetchEmails();
+});
+
+const fetchEmails = async () => {
+  try {
+    isLoadingEmails.value = true;
+    error.value = null;
+    
+    const response = await fetch("http://51.83.76.210/gsb/backend/fetchEmailAddVisiteur.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.success && Array.isArray(data.emails)) {
+      availableEmails.value = data.emails;
+    } else {
+      throw new Error(data.message || "Erreur lors de la récupération des emails");
+    }
+  } catch (err) {
+    console.error("Erreur lors du chargement des emails:", err);
+    NotifError("Impossible de charger la liste des emails", { 
+      title: "Erreur" 
+    });
+  } finally {
+    isLoadingEmails.value = false;
+  }
+};
 
 const validateForm = () => {
   const validations = [
@@ -60,6 +98,11 @@ const validateForm = () => {
     error.value = "Veuillez sélectionner un rôle pour le nouvel employé.";
     return false;
   }
+  
+  if (!selectedUserId.value) {
+    error.value = "Veuillez sélectionner un email pour l'utilisateur.";
+    return false;
+  }
 
   return true;
 };
@@ -81,7 +124,8 @@ const addUser = async () => {
       codePostal: codePostal.value,
       ville: ville.value,
       dateEmbauche: dateEmbauche.value,
-      role: role.value
+      role: role.value,
+      userId: selectedUserId.value
     };
 
     const response = await fetch("http://51.83.76.210/gsb/backend/addVisiteur.php", {
@@ -161,6 +205,46 @@ const addUser = async () => {
         </div>
 
         <div class="sm:col-span-6">
+          <label for="email" class="block text-sm font-medium text-gray-700">Email de l'utilisateur</label>
+          <div class="mt-1 relative">
+            <select 
+              id="email" 
+              name="email" 
+              v-model="selectedUserId"
+              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md cursor-pointer"
+              :disabled="isLoadingEmails"
+            >
+              <option value="" disabled selected>Sélectionnez un email</option>
+              <option v-for="emailObj in availableEmails" :key="emailObj.id" :value="emailObj.id">
+                {{ emailObj.email }}
+              </option>
+            </select>
+            <div v-if="isLoadingEmails" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <svg class="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-2 flex items-center space-x-2">
+            <button 
+              type="button" 
+              @click="fetchEmails" 
+              class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              :disabled="isLoadingEmails"
+            >
+              <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Rafraîchir la liste
+            </button>
+            <p v-if="availableEmails.length === 0 && !isLoadingEmails" class="text-sm text-red-600">
+              Aucun email disponible.
+            </p>
+          </div>
+        </div>
+
+        <div class="sm:col-span-6">
           <label for="adresse" class="block text-sm font-medium text-gray-700">Adresse</label>
           <div class="mt-1">
             <input 
@@ -218,7 +302,7 @@ const addUser = async () => {
               id="role" 
               name="role" 
               v-model="role"
-              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md cursor-pointer"
             >
               <option value="" disabled>Sélectionnez le rôle</option>
               <option v-for="roleOption in roles" :key="roleOption.id" :value="roleOption.id">

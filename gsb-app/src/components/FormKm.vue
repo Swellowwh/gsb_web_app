@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue';
+import { useNotificationService } from '@/services/notification/notification';
+const { NotifSuccess } = useNotificationService();
 
 const date = ref('');
 const distance = ref('');
@@ -7,14 +9,13 @@ const description = ref('');
 const isLoading = ref(false);
 
 const submitFormKm = async () => {
+    if (isLoading.value) return;
+    
     isLoading.value = true;
-
     try {
         const response = await fetch("http://51.83.76.210/gsb/backend/addFormKm.php", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 date: date.value,
                 distance: distance.value,
@@ -26,19 +27,23 @@ const submitFormKm = async () => {
         const responseText = await response.text();
         console.log("Réponse brute:", responseText);
 
-        let result;
-        try {
-            result = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error("Erreur de parsing JSON:", parseError);
-            throw new Error("La réponse n'est pas un JSON valide");
-        }
+        const data = JSON.parse(responseText);
+        if (!response.ok) throw new Error(`Erreur serveur: ${data.message || response.statusText}`);
     } catch (err) {
-        console.error("Erreur complète:", err);
-        console.error("Impossible de charger les données des visiteurs", { title: "Erreur de connexion" });
+        console.error("Erreur:", err);
     } finally {
-        isLoading.value = false;
+        setTimeout(() => {
+            NotifSuccess(`Frais kilométrique ajouté avec succès`);
+            reinitialiserFormulaire();
+            isLoading.value = false;
+        }, 1000);
     }
+};
+
+const reinitialiserFormulaire = () => {
+    date.value = '';
+    distance.value = '';
+    description.value = '';
 };
 </script>
 
@@ -100,17 +105,28 @@ const submitFormKm = async () => {
 
         <div class="md:col-span-2 flex justify-end space-x-4 pt-4">
             <button type="button" @click="reinitialiserFormulaire"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                :disabled="isLoading">
                 Annuler
             </button>
             <button type="submit" @click.prevent="submitFormKm()"
-                class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span v-if="isLoading">Chargement...</span>
-                <span v-else>Soumettre la demande</span>
+                class="relative px-4 py-2 border border-transparent rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center min-w-[150px] transition-all duration-200"
+                :disabled="isLoading"
+                :class="{ 'opacity-75': isLoading }">
+                <span v-if="!isLoading" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Soumettre la demande
+                </span>
+                <span v-else class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Traitement en cours...
+                </span>
             </button>
         </div>
     </form>

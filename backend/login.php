@@ -21,13 +21,13 @@ try {
 
     // Récupération des données frontend
     $input = json_decode(file_get_contents('php://input'), true);
-    $username = trim($input['username'] ?? '');
+    $email = trim($input['email'] ?? '');
     $password = $input['password'] ?? '';
 
     // Vérification des entrées
-    if (empty($username) || empty($password)) {
+    if (empty($email) || empty($password)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Nom d\'utilisateur et mot de passe requis']);
+        echo json_encode(['success' => false, 'message' => 'Email et mot de passe requis']);
         exit;
     }
 
@@ -36,8 +36,8 @@ try {
     $pdo = $database->getPDO();
 
     // Vérifier si l'utilisateur existe
-    $stmt = $pdo->prepare("SELECT id, username, password, role FROM user WHERE username = :username");
-    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt = $pdo->prepare("SELECT id, email, password, role FROM user WHERE email = :email");
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -50,7 +50,6 @@ try {
     // Création du token JWT
     $secret_key = $_ENV['JWT_CONTROL'];
     
-    // Vérification que la clé JWT est bien chargée
     if (!$secret_key) {
         throw new Exception('La clé JWT_CONTROL n\'est pas définie dans les variables d\'environnement');
     }
@@ -61,7 +60,7 @@ try {
         "iat" => time(),
         "exp" => $expiration,
         "user_id" => $user['id'],
-        "username" => $user['username'],
+        "email" => $user['email'],
         "role" => $user['role']
     ];
     
@@ -84,7 +83,7 @@ try {
         'token' => $jwt,
         'user' => [
             'id' => $user['id'],
-            'username' => $user['username'],
+            'email' => $user['email'],
             'role' => $user['role']
         ]
     ]);

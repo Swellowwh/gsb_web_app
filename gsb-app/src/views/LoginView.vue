@@ -12,20 +12,13 @@ const isLoggedIn = ref(false);
 const isAuthenticating = ref(false);
 const showLoginForm = ref(true);
 
-const username = ref('');
+const email = ref('');
 const password = ref('');
-const registerUsername = ref('');
+const registerEmail = ref('');
 const registerPassword = ref('');
 
 const errorMessage = ref('');
 const successMessage = ref('');
-
-const showNotification = (message) => {
-  successMessage.value = message;
-  setTimeout(() => {
-    successMessage.value = '';
-  }, 3000);
-};
 
 const login = async () => {
   isAuthenticating.value = true;
@@ -37,7 +30,7 @@ const login = async () => {
       credentials: "include",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        username: username.value,
+        email: email.value,
         password: password.value
       })
     });
@@ -68,7 +61,7 @@ const register = async () => {
       credentials: "include",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        username: registerUsername.value,
+        Email: registerEmail.value,
         password: registerPassword.value
       })
     });
@@ -78,7 +71,7 @@ const register = async () => {
 
     NotifSuccess('Utilisateur créé avec succès');
     showLoginForm.value = true;
-    username.value = registerUsername.value;
+    email.value = registerEmail.value;
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
@@ -134,16 +127,16 @@ const toggleForm = (isLogin) => {
         <div v-if="showLoginForm" class="p-6">
           <form @submit.prevent="login" class="space-y-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <input type="text" v-model="username"
+                <input type="text" v-model="Email"
                   class="pl-10 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  placeholder="Votre nom d'utilisateur" required>
+                  placeholder="Entrer votre adresse email" required>
               </div>
             </div>
 
@@ -178,16 +171,16 @@ const toggleForm = (isLogin) => {
         <div v-else class="p-6">
           <form @submit.prevent="register" class="space-y-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <input type="text" v-model="registerUsername"
+                <input type="text" v-model="registerEmail"
                   class="pl-10 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  placeholder="Choisissez un nom d'utilisateur" required>
+                  placeholder="Entrer votre adresse email" required>
               </div>
             </div>
 
