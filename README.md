@@ -1,4 +1,4 @@
-# Projet GSB - Gestion de laboratoire pharmaceutique
+# Projet GSB - Gestion de frais
 
 ## Introduction
 
