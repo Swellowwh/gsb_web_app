@@ -21,7 +21,7 @@ const checkSession = async () => {
     isLoading.value = true;
     loadingStartTime = Date.now();
 
-    const response = await fetch("http://51.83.76.210/gsb/backend/checkSession.php", {
+    const response = await fetch("http://51.83.76.210/gsb/api/checkSession.php", {
       method: "POST",
       credentials: "include",
     });

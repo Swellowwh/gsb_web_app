@@ -27,7 +27,7 @@ const login = async () => {
   errorMessage.value = '';
 
   try {
-    const response = await fetch("http://51.83.76.210/gsb/backend/login.php", {
+    const response = await fetch("http://51.83.76.210/gsb/api/login.php", {
       method: "POST",
       credentials: "include",
       headers: { 'Content-Type': 'application/json' },
@@ -65,7 +65,7 @@ const register = async () => {
   errorMessage.value = '';
 
   try {
-    const response = await fetch("http://51.83.76.210/gsb/backend/register.php", {
+    const response = await fetch("http://51.83.76.210/gsb/api/register.php", {
       method: "POST",
       credentials: "include",
       headers: { 'Content-Type': 'application/json' },

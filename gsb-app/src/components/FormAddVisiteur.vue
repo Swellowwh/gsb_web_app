@@ -47,7 +47,7 @@ const fetchEmails = async () => {
     isLoadingEmails.value = true;
     error.value = null;
     
-    const response = await fetch("http://51.83.76.210/gsb/backend/fetchEmailAddVisiteur.php", {
+    const response = await fetch("http://51.83.76.210/gsb/api/fetchEmailAddVisiteur.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" }
     });
@@ -128,7 +128,7 @@ const addUser = async () => {
       userId: selectedUserId.value
     };
 
-    const response = await fetch("http://51.83.76.210/gsb/backend/addVisiteur.php", {
+    const response = await fetch("http://51.83.76.210/gsb/api/addVisiteur.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData)

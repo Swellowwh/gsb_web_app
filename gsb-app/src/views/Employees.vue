@@ -14,7 +14,7 @@ const fetchVisiteurs = async () => {
   visiteurs.value = [];
 
   try {
-    const response = await fetch("http://51.83.76.210/gsb/backend/loadUtilisateur.php", {
+    const response = await fetch("http://51.83.76.210/gsb/api/loadUtilisateur.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,7 +68,7 @@ const deleteUser = async (id, nom, prenom) => {
   visiteurs.value = [];
 
   try {
-    const response = await fetch(`http://51.83.76.210/gsb/backend/deleteVisiteur.php`, {
+    const response = await fetch(`http://51.83.76.210/gsb/api/deleteVisiteur.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

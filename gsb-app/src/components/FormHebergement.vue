@@ -61,7 +61,7 @@ const submitFormHebergement = async () => {
 
     isLoading.value = true;
     try {
-        const response = await fetch("http://51.83.76.210/gsb/backend/addFormHebergement.php", {
+        const response = await fetch("http://51.83.76.210/gsb/api/addFormHebergement.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

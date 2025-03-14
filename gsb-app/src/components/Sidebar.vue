@@ -109,7 +109,7 @@ const formattedRole = computed(() => {
 
 const logout = async () => {
     try {
-        const response = await fetch("http://51.83.76.210/gsb/backend/logout.php", {
+        const response = await fetch("http://51.83.76.210/gsb/api/logout.php", {
             method: "POST",
             credentials: "include",
         });

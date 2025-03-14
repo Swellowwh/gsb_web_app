@@ -20,7 +20,7 @@ const submitFormKm = async () => {
 
     isLoading.value = true;
     try {
-        const response = await fetch("http://51.83.76.210/gsb/backend/addFormKm.php", {
+        const response = await fetch("http://51.83.76.210/gsb/api/addFormKm.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
