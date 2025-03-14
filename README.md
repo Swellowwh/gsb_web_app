@@ -7,7 +7,7 @@ GSB (Galaxy Swiss Bourdin) est une application de gestion pour laboratoire pharm
 L'application permet la gestion des différents acteurs du laboratoire pharmaceutique avec une architecture de rôles multiples :
 
 - **Administrateurs** : Gestion complète de l'application et des utilisateurs
-- **Visiteurs médicaux** : Accès aux fonctionnalités de visite et rapports
+- **Visiteurs médicaux** : Accès aux fonctionnalités de gestion de frais lors des différents déplacements
 - **Comptables** : Manipulation et vérification des données financières des visiteurs
 
 Le système d'authentification utilise des tokens JWT pour sécuriser les accès, et chaque rôle dispose de fonctionnalités spécifiques adaptées à ses besoins.
