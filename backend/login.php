@@ -47,6 +47,20 @@ try {
         exit;
     }
 
+    // Récupération des taux de frais
+    $tauxStmt = $pdo->prepare("SELECT T_ID as code, T_MONTANT as taux FROM taux_frais");
+    $tauxStmt->execute();
+    $tauxResults = $tauxStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Transformation des résultats en tableau associatif
+    $tauxFrais = [];
+    foreach ($tauxResults as $taux) {
+        $tauxFrais[$taux['code']] = [
+            'code' => $taux['code'],
+            'taux' => floatval($taux['taux'])
+        ];
+    }
+
     // Création du token JWT
     $secret_key = $_ENV['JWT_CONTROL'];
     
@@ -75,7 +89,7 @@ try {
         'samesite' => 'Lax'
     ]);
 
-    // Réponse JSON
+    // Réponse JSON incluant les taux de frais
     http_response_code(200);
     echo json_encode([
         'success' => true,
@@ -85,7 +99,8 @@ try {
             'id' => $user['id'],
             'email' => $user['email'],
             'role' => $user['role']
-        ]
+        ],
+        'tauxFrais' => $tauxFrais
     ]);
 
 } catch (Exception $e) {

@@ -2,8 +2,10 @@
 import { onMounted, provide, ref, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
+import { useTauxFraisStore } from '@/stores/tauxFrais.js';
 import Notification from '@/components/Notification.vue';
 
+const tauxStore = useTauxFraisStore();
 const userStore = useUserStore();
 const router = useRouter();
 
@@ -11,15 +13,14 @@ const isLoggedIn = ref(false);
 const userData = ref(null);
 const isLoading = ref(true);
 
-// Timer pour garantir une durée minimale d'affichage du chargement
-const minLoadingTime = 3000; // 3 secondes minimum
+const minLoadingTime = 3000;
 let loadingStartTime;
 
 const checkSession = async () => {
   try {
     isLoading.value = true;
     loadingStartTime = Date.now();
-    
+
     const response = await fetch("http://51.83.76.210/gsb/backend/checkSession.php", {
       method: "POST",
       credentials: "include",
@@ -29,16 +30,20 @@ const checkSession = async () => {
 
     if (data.success) {
       isLoggedIn.value = true;
-      
+
       if (data.token_data && data.token_data.verified_data) {
         userStore.setUser(data.token_data.verified_data);
       }
-      
+
+      if (data.taux_frais) {
+        tauxStore.setTaux(data.taux_frais);
+      }
+
       return true;
     } else {
       isLoggedIn.value = false;
       userData.value = null;
-      // Redirection vers login si la session n'est pas valide
+
       router.push('/login');
       return false;
     }
@@ -53,7 +58,7 @@ const checkSession = async () => {
     // Calculer le temps écoulé depuis le début du chargement
     const elapsedTime = Date.now() - loadingStartTime;
     const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
-    
+
     // Si le temps minimum n'est pas atteint, attendre avant de masquer le loader
     if (remainingTime > 0) {
       setTimeout(() => {
@@ -65,7 +70,6 @@ const checkSession = async () => {
   }
 };
 
-// Vérifier la session au chargement de l'application
 onMounted(async () => {
   await checkSession();
 });
@@ -135,10 +139,13 @@ provide('checkSession', checkSession);
 }
 
 @keyframes letterFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) scale(1);
     text-shadow: 0 0 0 rgba(79, 70, 229, 0);
   }
+
   50% {
     transform: translateY(-10px) scale(1.1);
     text-shadow: 0 10px 10px rgba(79, 70, 229, 0.2);
@@ -160,22 +167,27 @@ provide('checkSession', checkSession);
     background-position: 0 50%, 50% 50%, 100% 50%;
     transform: scale(0.95);
   }
+
   20% {
     background-position: 0 30%, 50% 50%, 100% 50%;
     transform: scale(1);
   }
+
   40% {
     background-position: 0 70%, 50% 30%, 100% 50%;
     transform: scale(0.98);
   }
+
   60% {
     background-position: 0 50%, 50% 70%, 100% 30%;
     transform: scale(1);
   }
+
   80% {
     background-position: 0 50%, 50% 50%, 100% 70%;
     transform: scale(0.95);
   }
+
   100% {
     background-position: 0 50%, 50% 50%, 100% 50%;
     transform: scale(1);

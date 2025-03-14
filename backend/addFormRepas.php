@@ -33,21 +33,20 @@ try {
         throw new Exception('Données JSON invalides');
     }
 
-    // Récupération et validation des données
     $date = isset($input['date']) ? trim($input['date']) : '';
-    $distance = isset($input['distance']) ? floatval($input['distance']) : 0;
+    $nombreRepas = isset($input['nombreRepas']) ? intval($input['nombreRepas']) : 0;
     $description = isset($input['description']) ? trim($input['description']) : '';
+    $montantTotal = isset($input['montantTotal']) ? floatval($input['montantTotal']) : 0;
 
-    // Vérification que tous les champs sont remplis
     if (empty($date)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Le champ date est obligatoire']);
         exit;
     }
     
-    if (empty($distance) || $distance <= 0) {
+    if (empty($nombreRepas) || $nombreRepas <= 0) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Le champ distance est obligatoire et doit être supérieur à 0']);
+        echo json_encode(['success' => false, 'message' => 'Le champ nombre de repas est obligatoire et doit être supérieur à 0']);
         exit;
     }
     
@@ -60,29 +59,31 @@ try {
     $database = Database::getInstance();
     $pdo = $database->getPDO();
 
-    $tauxStmt = $pdo->prepare("SELECT T_MONTANT FROM taux_frais WHERE T_ID = 'Km'");
+    $tauxStmt = $pdo->prepare("SELECT T_MONTANT FROM taux_frais WHERE T_ID = 'Repas'");
     $tauxStmt->execute();
-    $tauxKm = $tauxStmt->fetchColumn();
+    $tauxRepas = $tauxStmt->fetchColumn();
     
-    $montant = $distance * $tauxKm;
+    if (empty($montantTotal)) {
+        $montantTotal = $nombreRepas * $tauxRepas;
+    }
 
     $stmt = $pdo->prepare("INSERT INTO fiche_frais (TYPE, DATE, DESCRIPTION, MONTANT, user_id) 
                           VALUES (:type, :date, :description, :montant, :userId)");
                           
-    $type = 'Km';
+    $type = 'Repas';
     $stmt->bindParam(':type', $type, PDO::PARAM_STR);
     $stmt->bindParam(':date', $date, PDO::PARAM_STR);
     $stmt->bindParam(':description', $description, PDO::PARAM_STR);
-    $stmt->bindParam(':montant', $montant, PDO::PARAM_STR);
+    $stmt->bindParam(':montant', $montantTotal, PDO::PARAM_STR);
     $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
     $success = $stmt->execute();
 
     if ($success) {
-        echo json_encode(['success' => true, 'message' => 'Frais kilométriques ajoutés avec succès']);
+        echo json_encode(['success' => true, 'message' => 'Frais de repas ajoutés avec succès']);
     } else {
         $errorInfo = $stmt->errorInfo();
-        throw new Exception('Erreur lors de l\'ajout des frais kilométriques: ' . $errorInfo[2]);
+        throw new Exception('Erreur lors de l\'ajout des frais de repas: ' . $errorInfo[2]);
     }
 } catch (PDOException $e) {
     http_response_code(500);

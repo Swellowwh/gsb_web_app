@@ -104,7 +104,7 @@ onMounted(() => {
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
               <button type="button" @click="openForm"
                 class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                {{ FormOpen ? 'Annuler' : 'Ajouter un utilisateur' }}
+                {{ FormOpen ? 'Annuler' : 'Ajouter un employé' }}
               </button>
             </div>
           </div>
@@ -123,7 +123,7 @@ onMounted(() => {
               </path>
             </svg>
             <p class="text-gray-700 font-medium text-lg">Chargement des données...</p>
-            <p class="text-gray-500 mt-2">Veuillez patienter pendant que nous récupérons la liste des visiteurs</p>
+            <p class="text-gray-500 mt-2">Veuillez patienter pendant que nous récupérons la liste des employées</p>
           </div>
         </div>
 
@@ -188,7 +188,7 @@ onMounted(() => {
                 </table>
 
                 <div v-if="visiteurs.length === 0" class="text-center py-10 bg-white">
-                  <p class="text-gray-500">Aucun utilisateur trouvé pour cette recherche</p>
+                  <p class="text-gray-500">Aucun employé trouvé pour cette recherche</p>
                 </div>
               </div>
             </div>

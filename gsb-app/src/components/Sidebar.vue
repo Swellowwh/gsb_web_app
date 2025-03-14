@@ -79,12 +79,12 @@ const navigation = computed(() => {
 
 // Fonction pour obtenir les initiales de l'utilisateur
 const getUserInitials = computed(() => {
-    const username = userStore.userData?.username || '';
-    if (!username) return 'UN'; // UN pour "User Name" par défaut
+    const email = userStore.userData?.email || '';
+    if (!email) return 'UN'; // UN pour "User Name" par défaut
 
     // Si le nom est composé, prendre les initiales de chaque partie
-    if (username.includes(' ')) {
-        return username
+    if (email.includes(' ')) {
+        return email
             .split(' ')
             .map(part => part.charAt(0))
             .join('')
@@ -92,7 +92,7 @@ const getUserInitials = computed(() => {
     }
 
     // Sinon retourner les deux premières lettres du nom
-    return username.substring(0, 2).toUpperCase();
+    return email.substring(0, 2).toUpperCase();
 });
 
 // État de la modal de profil
@@ -173,7 +173,7 @@ const logout = async () => {
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between">
                             <span class="block truncate text-base text-white font-medium">
-                                {{ userStore.userData?.username || 'Utilisateur' }}
+                                {{ userStore.userData?.email || 'Utilisateur' }}
                             </span>
                         </div>
                         <span class="text-xs font-medium text-indigo-200">

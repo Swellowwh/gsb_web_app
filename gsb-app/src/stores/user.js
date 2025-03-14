@@ -2,28 +2,28 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', () => {
-  
+
   const userData = ref({
-    username: '',
+    email: '',
     role: ''
   });
 
-  const username = computed(() => userData.value.username);
+  const email = computed(() => userData.value.email);
   const role = computed(() => userData.value.role);
 
   function setUser(user) {
-    userData.value = { 
-      username: user.username || 'Invité', 
-      role: user.role || 'Aucun rôle' 
+    userData.value = {
+      email: user.email,
+      role: user.role,
     };
   }
 
   function reset() {
     userData.value = {
-      username: '',
+      email: '',
       role: ''
     };
   }
 
-  return { userData, username, role, setUser, reset };
+  return { userData, email, role, setUser, reset };
 });

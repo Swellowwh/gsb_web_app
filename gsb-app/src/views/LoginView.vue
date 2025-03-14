@@ -2,10 +2,12 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import { useTauxFraisStore } from '@/stores/tauxFrais.js';
 import { useNotificationService } from '@/services/notification/notification';
 const { NotifSuccess } = useNotificationService();
 
 const userStore = useUserStore();
+const tauxStore = useTauxFraisStore();
 const router = useRouter();
 
 const isLoggedIn = ref(false);
@@ -38,14 +40,21 @@ const login = async () => {
     const data = await response.json();
     if (!data.success) throw new Error(data.message || 'Erreur de connexion');
 
-    console.log(data);
+    console.log('Données reçues du serveur:', data);
 
     userStore.setUser(data.user);
+    
+    if (data.tauxFrais) {
+      tauxStore.setTaux(data.tauxFrais);
+    }
+
     NotifSuccess('Connexion réussie');
 
     router.push('/');
   } catch (error) {
+    console.error('Erreur de connexion:', error);
     errorMessage.value = error.message;
+    NotifError(error.message);
   } finally {
     isAuthenticating.value = false;
   }
@@ -61,7 +70,7 @@ const register = async () => {
       credentials: "include",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        Email: registerEmail.value,
+        email: registerEmail.value,
         password: registerPassword.value
       })
     });
@@ -134,7 +143,7 @@ const toggleForm = (isLogin) => {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <input type="text" v-model="Email"
+                <input type="text" v-model="email"
                   class="pl-10 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                   placeholder="Entrer votre adresse email" required>
               </div>
