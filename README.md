@@ -138,8 +138,8 @@ L'application sera accessible à l'adresse : http://localhost:5173 pour le front
 ## Structure des rôles
 
 - **Administrateurs** : Accès complet à toutes les fonctionnalités et gestion des utilisateurs
-- **Visiteurs médicaux** : Création de rapports de visite, gestion des frais, consultation des médicaments
-- **Comptables** : Validation des notes de frais, consultation des statistiques, gestion des paiements
+- **Visiteurs médicaux** : Création de rapports de visite, gestion des frais,
+- **Comptables** : Validation des notes de frais, mise en paiement fictive.
 
 ## Fonctionnalités principales
 
