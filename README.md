@@ -143,17 +143,7 @@ L'application sera accessible à l'adresse : http://localhost:5173 pour le front
 
 ## Fonctionnalités principales
 
-- Authentification sécurisée par token JWT
-- Gestion des profils utilisateurs
-- Rapports de visites médicales
-- Gestion des frais et notes de dépenses
-- Administration des médicaments et produits
-- Tableau de bord personnalisé selon le rôle
-
-## Contribuer au projet
-
-Ce projet étant à but éducatif, les contributions sont principalement destinées à améliorer le code et les fonctionnalités pour des fins d'apprentissage.
-
-## Licence
-
-Ce projet est distribué sous licence MIT.
+- Authentification par token JWT
+- Gestion des profils utilisateurs pour l'administrateur
+- Gestion de frais pour les visiteurs médicaux traité par les comptables de l'entreprise pour effectuer des remboursements
+- Tableau de bord personnalisé selon le rôle de l'utilisateur
