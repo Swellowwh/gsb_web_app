@@ -12,6 +12,8 @@ onMounted(() => {
   if (router.currentRoute.value.path === '/') {
     if (userStore.userData.role === 'ADMINISTRATEUR') {
       router.push('/employees');
+    } else if (userStore.userData.role === 'COMPTABLE') {
+      router.push('/payments');
     } else {
       router.push('/frais');
     }

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const checkSession = async () => {
   try {
-    const response = await fetch("http://51.83.76.210/gsb/backend/checkSession.php", {
+    const response = await fetch("http://51.83.76.210/gsb/api/checkSession.php", {
       method: "POST",
       credentials: "include",
     });

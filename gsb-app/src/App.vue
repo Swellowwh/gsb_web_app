@@ -17,6 +17,7 @@ const minLoadingTime = 3000;
 let loadingStartTime;
 
 const checkSession = async () => {
+  
   try {
     isLoading.value = true;
     loadingStartTime = Date.now();

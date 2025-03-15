@@ -40,7 +40,7 @@ const visiteurMedicalNavigation = [
 ];
 
 const comptableNavigation = [
-    { name: 'Gestion des paiements', path: '/paiement', icon: BanknotesIcon, current: computed(() => route.path === '/paiement') },
+    { name: 'Gestion des paiements', path: '/payments', icon: BanknotesIcon, current: computed(() => route.path === '/payments') },
 ];
 
 const administrateurNavigation = [

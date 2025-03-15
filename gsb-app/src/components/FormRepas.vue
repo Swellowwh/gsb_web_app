@@ -25,9 +25,7 @@ const tauxFormatted = computed(() => {
 });
 
 const montantTotal = computed(() => {
-    return formRepas.value.nombreRepas ? 
-        (formRepas.value.nombreRepas * tauxFraisStore.tauxFrais.REP.taux).toFixed(2) : 
-        "0.00";
+    return (formRepas.value.nombreRepas * tauxFraisStore.tauxFrais.REP.taux).toFixed(2);
 });
 
 const reinitialiserFormulaire = () => {
@@ -53,7 +51,7 @@ const submitFormRepas = async () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 date: formRepas.value.date,
-                nombreRepas: formRepas.value.nombreRepas,
+                montantTotal: montantTotal.value,
                 description: formRepas.value.description
             }),
             credentials: "include"

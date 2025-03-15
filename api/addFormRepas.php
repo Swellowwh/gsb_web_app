@@ -34,7 +34,6 @@ try {
     }
 
     $date = isset($input['date']) ? trim($input['date']) : '';
-    $nombreRepas = isset($input['nombreRepas']) ? intval($input['nombreRepas']) : 0;
     $description = isset($input['description']) ? trim($input['description']) : '';
     $montantTotal = isset($input['montantTotal']) ? floatval($input['montantTotal']) : 0;
 
@@ -44,7 +43,7 @@ try {
         exit;
     }
     
-    if (empty($nombreRepas) || $nombreRepas <= 0) {
+    if (empty($montantTotal) || $montantTotal <= 0) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Le champ nombre de repas est obligatoire et doit être supérieur à 0']);
         exit;
