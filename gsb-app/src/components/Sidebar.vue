@@ -15,10 +15,10 @@ import {
     DocumentPlusIcon,
     ClockIcon,
     ArrowRightOnRectangleIcon,
-    Cog6ToothIcon,
+    DocumentTextIcon,
     UserIcon,
     CreditCardIcon
-} from '@heroicons/vue/24/solid';
+} from '@heroicons/vue/24/outline';
 
 // Déterminer le rôle de l'utilisateur
 const isVisiteurMedical = computed(() =>
@@ -35,12 +35,12 @@ const isAdministrateur = computed(() =>
 
 // Définition des navigations spécifiques en fonction du rôle
 const visiteurMedicalNavigation = [
-    { name: 'Fiche de frais', path: '/frais', icon: BanknotesIcon, current: computed(() => route.path === '/frais') },
-    { name: 'Historique', path: '/historique', icon: CalendarIcon, current: computed(() => route.path === '/historique') },
+    { name: 'Fiche de frais', path: '/frais', icon: BanknotesIcon, current: computed(() => route.path === '/frais'), hasDropdown: false },
+    { name: 'Historique', path: '/historique', icon: CalendarIcon, current: computed(() => route.path === '/historique'), hasDropdown: false },
 ];
 
 const comptableNavigation = [
-    { name: 'Gestion des paiements', path: '/payments', icon: BanknotesIcon, current: computed(() => route.path === '/payments') },
+    { name: 'Gestion des paiements', path: '/payments', icon: BanknotesIcon, current: computed(() => route.path === '/payments'), hasDropdown: false },
 ];
 
 const administrateurNavigation = [
@@ -48,25 +48,37 @@ const administrateurNavigation = [
         name: 'Liste des employés',
         path: '/employees',
         icon: UserGroupIcon,
-        current: computed(() => route.path === '/employees')
+        current: computed(() => route.path === '/employees'),
+        hasDropdown: false
     },
     {
-        name: 'Ajouter une fiche',
+        name: 'Fiches de frais',
         path: '/frais',
         icon: DocumentPlusIcon,
-        current: computed(() => route.path === '/frais')
+        current: computed(() => route.path === '/frais' || route.path.startsWith('/frais/')),
+        hasDropdown: true
     },
     {
-        name: 'Historique des fiches',
+        name: 'Historique',
         path: '/historique',
         icon: ClockIcon,
-        current: computed(() => route.path === '/historique')
+        current: computed(() => route.path === '/historique'),
+        hasDropdown: false
     },
     {
-        name: 'Mise en paiement',
+        name: 'Paiements',
         path: '/payments',
         icon: CreditCardIcon,
-        current: computed(() => route.path === '/payments')
+        current: computed(() => route.path === '/payments'),
+        hasDropdown: true
+    },
+    {
+        name: 'Documentation',
+        path: '/documentation',
+        icon: DocumentTextIcon,
+        current: computed(() => route.path === '/documentation'),
+        hasDropdown: false,
+        badge: 'New'
     },
 ];
 
@@ -133,57 +145,100 @@ const logout = async () => {
 </script>
 
 <template>
-    <div class="h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-indigo-800 overflow-hidden relative">
-        <div class="relative z-10 w-full">
-            <div class="flex items-center justify-center h-20 px-4">
-                <h1 class="text-white text-4xl font-bold tracking-widest">
-                    <span class="text-white">GSB</span>
+    <div class="h-screen flex flex-col bg-indigo-900 overflow-hidden relative">
+        <div class="relative p-5 border-b border-indigo-800">
+            <div class="flex items-center">
+                <h1 class="text-white text-xl font-semibold tracking-wider ml-2.5">
+                    GSB
                 </h1>
             </div>
         </div>
 
-        <nav class="flex-1 overflow-y-auto px-6 py-6 relative z-10">
-            <div class="mb-6">
-                <ul role="list" class="flex flex-col gap-y-1.5">
-                    <li v-for="item in navigation" :key="item.name">
-                        <router-link :to="item.path" :class="[
-                            item.current
-                                ? 'bg-white text-black shadow-md'
-                                : 'text-gray-100 hover:bg-white/10',
-                            'group flex items-center gap-x-3 rounded-xl p-3 text-sm font-medium transition-all duration-200'
-                        ]">
+        <nav class="flex-1 overflow-y-auto py-4 px-3">
+            <ul class="space-y-2">
+                <li v-for="item in navigation" :key="item.name">
+                    <router-link :to="item.path" :class="[
+                        item.current.value
+                            ? 'bg-white text-indigo-900 font-semibold'
+                            : 'text-white hover:bg-indigo-700 hover:text-white',
+                        'group flex items-center justify-between px-3 py-3 rounded-md text-sm transition-all duration-150 shadow-sm'
+                    ]">
+                        <div class="flex items-center">
                             <component :is="item.icon"
-                                class="size-5 shrink-0 transition-transform duration-200 group-hover:scale-110"
-                                :class="item.current ? 'text-black' : 'text-gray-200'" aria-hidden="true" />
+                                class="mr-3 h-5 w-5"
+                                :class="item.current.value ? 'text-indigo-900' : 'text-white group-hover:text-white'" 
+                                aria-hidden="true" />
                             {{ item.name }}
-                        </router-link>
-                    </li>
-                </ul>
-            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <!-- Badge (if exists) -->
+                            <span v-if="item.badge" 
+                                  class="bg-white text-indigo-900 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">
+                                {{ item.badge }}
+                            </span>
+                            
+                            <!-- Dropdown arrow (if has dropdown) -->
+                            <svg v-if="item.hasDropdown" xmlns="http://www.w3.org/2000/svg" 
+                                 class="h-4 w-4 ml-1 text-indigo-300" 
+                                 fill="none" viewBox="0 0 24 24" 
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </router-link>
+                </li>
+            </ul>
         </nav>
 
-        <div class="w-full bg-gray-900/60 backdrop-blur-md relative z-10">
-            <div class="p-4">
-                <div class="flex items-center gap-x-4 relative">
-                    <div @click="showProfileMenu = !showProfileMenu"
-                        class="size-12 rounded-full border-2 border-indigo-400 flex items-center justify-center bg-indigo-700 text-white font-medium shadow-lg text-base transition-all duration-300 cursor-pointer hover:bg-indigo-600">
-                        {{ getUserInitials }}
-                    </div>
-
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between">
-                            <span class="block truncate text-base text-white font-medium">
-                                {{ userStore.userData?.email || 'Utilisateur' }}
-                            </span>
+        <!-- User Profile Section -->
+        <div class="relative border-t border-indigo-800 p-3">
+            <!-- Menu de déconnexion sur toute la largeur avec texte à gauche -->
+            <div v-if="showProfileMenu" 
+                 class="absolute left-3 right-3 bottom-full mb-2 py-1 bg-white rounded-md shadow-lg z-20 border border-indigo-100">
+                <button @click="logout()" 
+                        class="w-full text-left flex items-center px-4 py-2.5 text-sm text-indigo-900 hover:bg-indigo-100 transition-colors">
+                    <ArrowRightOnRectangleIcon class="mr-2 h-5 w-5 text-indigo-500" />
+                    Déconnexion
+                </button>
+            </div>
+            <div class="relative flex items-center justify-between cursor-pointer hover:bg-indigo-800 rounded-md p-2 transition-colors duration-150">
+                <div class="flex items-center">
+                    <div class="relative">
+                        <!-- User Avatar with solid background -->
+                        <div class="h-9 w-9 rounded-full bg-white flex items-center justify-center text-base text-indigo-800 font-bold shadow-md">
+                            {{ getUserInitials }}
                         </div>
-                        <span class="text-xs font-medium text-indigo-200">
-                            {{ formattedRole }}
+                        <!-- More visible pulsing indicator -->
+                        <span class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center">
+                            <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75 blur-[1px]"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500 ring-1 ring-indigo-900 z-10"></span>
                         </span>
                     </div>
-
-                    <button @click="logout()"
-                        class="p-2 rounded-full hover:bg-red-500/20 transition-all duration-300 group">
-                        <ArrowRightOnRectangleIcon class="h-5 w-5 text-red-400 group-hover:text-red-300" />
+                    
+                    <!-- User Name & Role -->
+                    <div class="ml-3 flex-1 min-w-0">
+                        <p class="text-sm font-medium text-white truncate">
+                            {{ userStore.userData?.email || 'Utilisateur' }}
+                        </p>
+                        <p class="text-xs text-indigo-200 truncate">
+                            {{ formattedRole }}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Dropdown Button for Logout Only -->
+                <div>
+                    <button @click="showProfileMenu = !showProfileMenu" 
+                            class="p-1.5 rounded-full hover:bg-indigo-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                             class="h-5 w-5 text-white" 
+                             viewBox="0 0 20 20" 
+                             fill="currentColor">
+                            <path fill-rule="evenodd" 
+                                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+                                  clip-rule="evenodd" />
+                        </svg>
                     </button>
                 </div>
             </div>
