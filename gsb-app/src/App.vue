@@ -17,7 +17,6 @@ const minLoadingTime = 3000;
 let loadingStartTime;
 
 const checkSession = async () => {
-  
   try {
     isLoading.value = true;
     loadingStartTime = Date.now();
@@ -90,12 +89,11 @@ provide('checkSession', checkSession);
 
 <template>
   <div v-if="isLoading" class="loading-container">
-    <div class="gsb-title">
-      <span>G</span>
-      <span>S</span>
-      <span>B</span>
+    <div class="three-layer-loader">
+      <div class="layer layer-1"></div>
+      <div class="layer layer-2"></div>
+      <div class="layer layer-3"></div>
     </div>
-    <div class="loader"></div>
   </div>
   <RouterView v-else />
   <Notification />
@@ -112,86 +110,59 @@ provide('checkSession', checkSession);
   background-color: #f5f5f5;
 }
 
-.gsb-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.1em;
-  color: #4f46e5;
-  display: flex;
-  gap: 0.5rem;
-}
-
-.gsb-title span {
-  display: inline-block;
-  animation: letterFloat 2s infinite ease-in-out;
-}
-
-.gsb-title span:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.gsb-title span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.gsb-title span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes letterFloat {
-
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-    text-shadow: 0 0 0 rgba(79, 70, 229, 0);
-  }
-
-  50% {
-    transform: translateY(-10px) scale(1.1);
-    text-shadow: 0 10px 10px rgba(79, 70, 229, 0.2);
-  }
-}
-
-.loader {
-  width: 90px;
-  height: 40px;
-  --g: radial-gradient(circle, #0000 60%, #4f46e5 62%, #6366f1 68%, #0000 72%) no-repeat;
-  background: var(--g), var(--g), var(--g);
-  background-size: 24px 24px;
+.three-layer-loader {
   position: relative;
-  animation: loaderAnimation 1.2s infinite ease-in-out;
+  width: 100px;
+  height: 100px;
 }
 
-@keyframes loaderAnimation {
-  0% {
-    background-position: 0 50%, 50% 50%, 100% 50%;
-    transform: scale(0.95);
-  }
+.layer {
+  position: absolute;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  box-sizing: border-box;
+}
 
-  20% {
-    background-position: 0 30%, 50% 50%, 100% 50%;
-    transform: scale(1);
-  }
+.layer-1 {
+  width: 100%;
+  height: 100%;
+  border-top-color: #4f46e5;
+  border-right-color: #4f46e5;
+  animation: spin1 1.5s linear infinite;
+}
 
-  40% {
-    background-position: 0 70%, 50% 30%, 100% 50%;
-    transform: scale(0.98);
-  }
+.layer-2 {
+  width: 70%;
+  height: 70%;
+  top: 15%;
+  left: 15%;
+  border-top-color: #6366f1;
+  border-left-color: #6366f1;
+  animation: spin2 1.8s linear infinite;
+}
 
-  60% {
-    background-position: 0 50%, 50% 70%, 100% 30%;
-    transform: scale(1);
-  }
+.layer-3 {
+  width: 40%;
+  height: 40%;
+  top: 30%;
+  left: 30%;
+  border-top-color: #818cf8;
+  border-bottom-color: #818cf8;
+  animation: spin3 2.1s linear infinite;
+}
 
-  80% {
-    background-position: 0 50%, 50% 50%, 100% 70%;
-    transform: scale(0.95);
-  }
+@keyframes spin1 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
-  100% {
-    background-position: 0 50%, 50% 50%, 100% 50%;
-    transform: scale(1);
-  }
+@keyframes spin2 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes spin3 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

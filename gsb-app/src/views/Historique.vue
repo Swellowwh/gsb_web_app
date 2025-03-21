@@ -1,9 +1,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useNotificationService } from '@/services/notification/notification';
+const { NotifSuccess } = useNotificationService();
 
 const historiqueData = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
+const selectedFrais = ref(null);
+const showDetailsModal = ref(false);
 
 const totalDepenses = computed(() => {
   if (!historiqueData.value.length) return "0,00 €";
@@ -118,8 +122,123 @@ function getStatusClass(status) {
   }
 }
 
-// Chargement des données
-onMounted(async () => {
+async function traiterPaiement(id, action) {
+  // Vérifier si l'action est autorisée en fonction du statut
+  const frais = historiqueData.value.find(f => f.id === id);
+  if (!frais) return;
+
+  // Empêcher la suppression des frais acceptés ou refusés
+  if (action === 'Trash' && (frais.statut === 'Accepted' || frais.statut === 'Rejected')) {
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+
+    const url = 'http://51.83.76.210/gsb/api/processingHistory.php';
+
+    const payload = {
+      idHistory: id,
+      processingHistory: action
+    };
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.success) {
+        if (action === 'Trash') {
+          NotifSuccess("La demande de remboursement a été supprimée.");
+        }
+
+        await chargerDonnees();
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors du traitement:', error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function sauvegarderModifications() {
+  if (!selectedFrais.value) return;
+  
+  try {
+    isLoading.value = true;
+    
+    const payload = {
+      idHistory: selectedFrais.value.id,
+      date: selectedFrais.value.date,
+      description: selectedFrais.value.description,
+      montant: parseMontant(selectedFrais.value.montant)
+    };
+    
+    if (selectedFrais.value.commentaire !== undefined) {
+      payload.commentaire = selectedFrais.value.commentaire;
+    }
+    
+    await new Promise(r => setTimeout(r, 500));
+    
+    const response = await fetch('http://51.83.76.210/gsb/api/updateFormData.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      NotifSuccess("Demande de remboursement mise à jour avec succès.");
+      closeDetailsModal();
+      await chargerDonnees();
+    } else {
+      error.value = data.message || "Erreur lors de la mise à jour";
+      if (data.details) error.value += ` - ${data.details}`;
+    }
+  } catch (err) {
+    error.value = err.message || "Problème lors de la mise à jour";
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+function editerFrais(id) {
+  // Vérifier si l'action est autorisée en fonction du statut
+  const frais = historiqueData.value.find(f => f.id === id);
+  if (!frais) return;
+
+  // Empêcher la modification des frais acceptés ou refusés
+  if (frais.statut === 'Accepted' || frais.statut === 'Rejected') {
+    return;
+  }
+
+  // Trouver les détails du frais sélectionné et faire une copie pour ne pas modifier l'original
+  selectedFrais.value = { ...frais };
+
+  // Afficher la modal
+  if (selectedFrais.value) {
+    showDetailsModal.value = true;
+  }
+}
+
+function closeDetailsModal() {
+  showDetailsModal.value = false;
+  selectedFrais.value = null;
+}
+
+async function chargerDonnees() {
   try {
     const response = await fetch(`http://51.83.76.210/gsb/api/loadFicheFrais.php`, {
       method: "POST",
@@ -129,18 +248,12 @@ onMounted(async () => {
 
     const data = await response.json();
 
-    console.log(data);
-
-    console.table(data);
-
     if (data.success) {
+
       // Formatage des données reçues
       historiqueData.value = data.tableau.map(item => ({
         ...item,
         // Ne pas ajouter "€" deux fois si déjà présent
-        montant: typeof item.montant === 'number'
-          ? item.montant.toFixed(2).replace('.', ',') + ' €'
-          : item.montant.includes('€') ? item.montant : item.montant + ' €'
       }));
     } else {
       error.value = "Impossible de récupérer les données";
@@ -148,11 +261,14 @@ onMounted(async () => {
   } catch (err) {
     error.value = "Erreur de connexion au serveur";
     console.error(err);
-  } finally {
-    setInterval(() => {
-      isLoading.value = false;
-    }, 500);
   }
+}
+
+onMounted(async () => {
+  await chargerDonnees();
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
 });
 </script>
 
@@ -268,7 +384,7 @@ onMounted(async () => {
               </thead>
               <tbody v-if="isLoading" class="bg-white divide-y divide-gray-200">
                 <tr>
-                  <td colspan="5" class="px-6 py-12 text-center">
+                  <td colspan="6" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center justify-center">
                       <svg class="animate-spin h-12 w-12 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg"
                         fill="none" viewBox="0 0 24 24">
@@ -286,7 +402,7 @@ onMounted(async () => {
               </tbody>
               <tbody v-else-if="error" class="bg-white divide-y divide-gray-200">
                 <tr>
-                  <td colspan="5" class="px-6 py-4 text-center text-red-500">
+                  <td colspan="6" class="px-6 py-4 text-center text-red-500">
                     {{ error }}
                   </td>
                 </tr>
@@ -310,7 +426,7 @@ onMounted(async () => {
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-700">{{ frais.description }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {{ formatMontant(frais.montant) }}
+                    {{ formatMontant(frais.montant) }}€
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="getStatusClass(frais.statut)" class="px-2.5 py-1 rounded-full text-xs font-medium">
@@ -318,8 +434,14 @@ onMounted(async () => {
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <!-- Bouton de suppression - désactivé si statut Accepted ou Rejected -->
                     <button @click="traiterPaiement(frais.id, 'Trash')"
-                      class="p-2 border rounded-md border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition duration-300 mr-2">
+                      :disabled="frais.statut === 'Accepted' || frais.statut === 'Rejected'" :class="[
+                        'p-2 border rounded-md mr-2 transition duration-300',
+                        (frais.statut === 'Accepted' || frais.statut === 'Rejected')
+                          ? 'border-gray-300 text-gray-300 cursor-not-allowed'
+                          : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'
+                      ]">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -327,12 +449,18 @@ onMounted(async () => {
                       </svg>
                     </button>
 
-                    <button @click="traiterPaiement(frais.id, 'Trash')"
-                      class="p-2 border rounded-md border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition duration-300">
+                    <!-- Bouton d'édition - uniquement pour les frais en statut Pending -->
+                    <button @click="editerFrais(frais.id)"
+                      :disabled="frais.statut === 'Accepted' || frais.statut === 'Rejected'" :class="[
+                        'p-2 border rounded-md transition duration-300',
+                        (frais.statut === 'Accepted' || frais.statut === 'Rejected')
+                          ? 'border-gray-300 text-gray-300 cursor-not-allowed'
+                          : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white'
+                      ]">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                   </td>
@@ -353,5 +481,76 @@ onMounted(async () => {
         </div>
       </div>
     </main>
+
+    <div v-if="showDetailsModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+      aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+          @click="closeDetailsModal"></div>
+
+        <div
+          class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full slide-in-top">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                  Modifier les informations de remboursement
+                </h3>
+
+                <div class="mt-6 space-y-4" v-if="selectedFrais">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <span :class="getTypeIconClass(selectedFrais.type)"
+                        class="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                          stroke="currentColor" v-html="getTypeIconSvg(selectedFrais.type)"></svg>
+                      </span>
+                      <span class="text-lg font-medium text-gray-900">{{ getTypeLabel(selectedFrais.type) }}</span>
+                    </div>
+                    <span :class="getStatusClass(selectedFrais.statut)"
+                      class="px-3 py-1 rounded-full text-sm font-medium">
+                      {{ getTypeStatut(selectedFrais.statut) }}
+                    </span>
+                  </div>
+
+                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="space-y-4">
+                      <div class="grid grid-cols-1 gap-y-2">
+                        <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                        <input type="date" id="date" v-model="selectedFrais.date"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                      </div>
+
+                      <div class="grid grid-cols-1 gap-y-2">
+                        <label for="montant" class="block text-sm font-medium text-gray-700">Montant</label>
+                        <input type="text" id="montant" v-model="selectedFrais.montant"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                      </div>
+
+                      <div class="grid grid-cols-1 gap-y-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description" v-model="selectedFrais.description" rows="3"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button type="button" @click="sauvegarderModifications"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+              Sauvegarder
+            </button>
+            <button type="button" @click="closeDetailsModal"
+              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

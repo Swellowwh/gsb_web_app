@@ -33,12 +33,10 @@ try {
         throw new Exception('Données JSON invalides');
     }
 
-    // Récupération et validation des données
     $date = isset($input['date']) ? trim($input['date']) : '';
     $distance = isset($input['distance']) ? floatval($input['distance']) : 0;
     $description = isset($input['description']) ? trim($input['description']) : '';
 
-    // Vérification que tous les champs sont remplis
     if (empty($date)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Le champ date est obligatoire']);
