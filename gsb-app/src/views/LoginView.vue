@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useTauxFraisStore } from '@/stores/tauxFrais.js';
 import { useNotificationService } from '@/services/notification/notification';
-const { NotifSuccess } = useNotificationService();
+const { NotifSuccess, NotifError } = useNotificationService();
 
 const userStore = useUserStore();
 const tauxStore = useTauxFraisStore();
