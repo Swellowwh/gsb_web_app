@@ -31,10 +31,10 @@ const totalDepenses = computed(() => {
   if (!historiqueData.value.length) return "0,00 €";
 
   const total = historiqueData.value.reduce((sum, item) => {
-    return sum + parseMontant(item.montant);
+    return sum + parseMontant(item.montant_total);
   }, 0);
 
-  return total.toFixed(2) + " €";
+  return total.toFixed(2).replace('.', ',') + " €";
 });
 
 const totalValidees = computed(() => {
@@ -43,10 +43,10 @@ const totalValidees = computed(() => {
   const total = historiqueData.value
     .filter(item => item.statut === 'Accepted')
     .reduce((sum, item) => {
-      return sum + parseMontant(item.montant);
+      return sum + parseMontant(item.montant_total);
     }, 0);
 
-  return total.toFixed(2) + " €";
+  return total.toFixed(2).replace('.', ',') + " €";
 });
 
 const totalEnAttente = computed(() => {
@@ -55,10 +55,10 @@ const totalEnAttente = computed(() => {
   const total = historiqueData.value
     .filter(item => item.statut === 'Pending')
     .reduce((sum, item) => {
-      return sum + parseMontant(item.montant);
+      return sum + parseMontant(item.montant_total);
     }, 0);
 
-  return total.toFixed(2) + " €";
+  return total.toFixed(2).replace('.', ',') + " €";
 });
 
 const totalRefusees = computed(() => {
@@ -67,27 +67,11 @@ const totalRefusees = computed(() => {
   const total = historiqueData.value
     .filter(item => item.statut === 'Rejected')
     .reduce((sum, item) => {
-      return sum + parseMontant(item.montant);
+      return sum + parseMontant(item.montant_total);
     }, 0);
 
-  return total.toFixed(2) + " €";
+  return total.toFixed(2).replace('.', ',') + " €";
 });
-
-function getTypeLabel(type) {
-  if (type === 'Km') {
-    return 'Transport';
-  }
-  return type;
-}
-
-function getTypeIconClass(type) {
-  switch (type) {
-    case 'Repas': return 'bg-green-100 text-green-600';
-    case 'Hebergement': return 'bg-purple-100 text-purple-600';
-    case 'Km': return 'bg-blue-100 text-blue-600';
-    default: return 'bg-gray-100 text-gray-600';
-  }
-}
 
 function getTypeStatut(statut) {
   switch (statut) {
@@ -106,22 +90,6 @@ function getStatusClass(status) {
     case 'Rejected': return 'bg-red-100 text-red-800';
     case 'Clotured': return 'bg-gray-100 text-gray-800';
     default: return 'bg-gray-100 text-gray-800';
-  }
-}
-
-function getTypeIconSvg(type) {
-  switch (type) {
-    case 'Kilométrique':
-      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />`;
-    case 'Repas':
-      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />`;
-    case 'Hebergement':
-      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />`;
-    case 'Km':
-      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />`;
-    default:
-      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />`;
   }
 }
 
@@ -191,15 +159,14 @@ async function chargerDonnees() {
       data = JSON.parse(responseText);
     } catch (jsonError) {
       console.error("Erreur de décodage JSON:", responseText);
+      throw new Error("Format de réponse invalide");
     }
 
     if (data.success) {
-      historiqueData.value = data.tableau.map(item => ({
-        ...item,
-        montant: typeof item.montant === 'number'
-          ? item.montant.toFixed(2).replace('.', ',')
-          : item.montant
-      }));
+      // Utiliser directement la structure de données
+      historiqueData.value = data.fiches;
+    } else {
+      throw new Error(data.message || "Impossible de récupérer les données");
     }
   } catch (err) {
     error.value = "Erreur de connexion au serveur: " + err.message;
@@ -324,10 +291,10 @@ onMounted(() => {
                 <tr>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date</th>
+                    Référence</th>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type</th>
+                    Date</th>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Description</th>
@@ -367,23 +334,22 @@ onMounted(() => {
                   </td>
                 </tr>
               </tbody>
-              <tbody v-else class="bg-white divide-y divide-gray-200">
-                <tr v-for="(frais, index) in historiqueData" :key="index"
-                  class="hover:bg-gray-50 transition-colors duration-150">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(frais.date) }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <span :class="getTypeIconClass(frais.type)"
-                        class="flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                          stroke="currentColor" v-html="getTypeIconSvg(frais.type)">
-                        </svg>
-                      </span>
-                      <span class="text-sm font-medium text-gray-900">{{ getTypeLabel(frais.type) }}</span>
-                    </div>
+              <tbody v-else-if="historiqueData.length === 0" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                    Aucune fiche de frais à afficher
                   </td>
+                </tr>
+              </tbody>
+              <tbody v-else class="bg-white divide-y divide-gray-200">
+                <tr v-for="frais in historiqueData" :key="frais.id"
+                  class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ frais.reference }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(frais.date) }}</td>
                   <td class="px-6 py-4 text-sm text-gray-700">{{ frais.description }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ frais.montant }} €</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {{ parseFloat(frais.montant_total).toFixed(2).replace('.', ',') }} €
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="getStatusClass(frais.statut)" class="px-2.5 py-1 rounded-full text-xs font-medium">
                       {{ getTypeStatut(frais.statut) }}
@@ -426,8 +392,7 @@ onMounted(() => {
           <div class="bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200">
             <div>
               <p class="text-sm text-gray-700">
-                Affichage de <span class="font-medium">1</span> à <span class="font-medium">{{ historiqueData.length
-                  }}</span>
+                Affichage de <span class="font-medium">{{ historiqueData.length > 0 ? 1 : 0 }}</span> à <span class="font-medium">{{ historiqueData.length }}</span>
                 sur <span class="font-medium">{{ historiqueData.length }}</span> résultats
               </p>
             </div>
