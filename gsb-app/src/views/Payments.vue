@@ -94,6 +94,7 @@ function getTypeStatut(statut) {
     case 'Accepted': return 'Accepté';
     case 'Pending': return 'En attente';
     case 'Rejected': return 'Refusé';
+    case 'Clotured': return 'Cloturé';
     default: return statut;
   }
 }
@@ -103,6 +104,7 @@ function getStatusClass(status) {
     case 'Accepted': return 'bg-green-100 text-green-800';
     case 'Pending': return 'bg-yellow-100 text-yellow-800';
     case 'Rejected': return 'bg-red-100 text-red-800';
+    case 'Clotured': return 'bg-gray-100 text-gray-800';
     default: return 'bg-gray-100 text-gray-800';
   }
 }

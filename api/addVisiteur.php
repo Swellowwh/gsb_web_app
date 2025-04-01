@@ -18,7 +18,7 @@ $userId = trim($input['userId'] ?? '');
 $adresse = trim($input['adresse'] ?? '');
 $codePostal = trim($input['codePostal'] ?? '');
 $ville = trim($input['ville'] ?? '');
-$role = trim($input['role'] ?? '');
+$role = strtolower(trim($input['role'] ?? ''));
 $dateEmbauche = trim($input['dateEmbauche'] ?? '');
 $username = trim($input['username'] ?? '');
 $password = $input['password'] ?? '';
@@ -39,7 +39,20 @@ $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 $success = $stmt->execute();
 
 if ($success) {
-    $lastInsertId = $pdo->lastInsertId();
+    $roleToUpdate = null;
+    if ($role === 'visiteur') {
+        $roleToUpdate = 'VISITEUR_MEDICAL';
+    } elseif ($role === 'comptable') {
+        $roleToUpdate = 'COMPTABLE';
+    }
+
+    if ($roleToUpdate) {
+        $updateStmt = $pdo->prepare("UPDATE user SET role = :newRole WHERE id = :userId");
+        $updateStmt->bindParam(':newRole', $roleToUpdate, PDO::PARAM_STR);
+        $updateStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $updateStmt->execute();
+    }
+
     echo json_encode(['success' => true]);
 } else {
     echo json_encode(['success' => false]);

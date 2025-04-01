@@ -8,15 +8,12 @@ const router = useRouter();
 const route = useRoute();
 
 import {
-    HomeIcon,
     BanknotesIcon,
     UserGroupIcon,
     CalendarIcon,
     DocumentPlusIcon,
     ClockIcon,
     ArrowRightOnRectangleIcon,
-    DocumentTextIcon,
-    UserIcon,
     CreditCardIcon
 } from '@heroicons/vue/24/outline';
 
@@ -56,38 +53,34 @@ const administrateurNavigation = [
         path: '/frais',
         icon: DocumentPlusIcon,
         current: computed(() => route.path === '/frais' || route.path.startsWith('/frais/')),
-        hasDropdown: true
     },
     {
         name: 'Historique',
         path: '/historique',
         icon: ClockIcon,
         current: computed(() => route.path === '/historique'),
-        hasDropdown: false
     },
     {
         name: 'Paiements',
         path: '/payments',
         icon: CreditCardIcon,
         current: computed(() => route.path === '/payments'),
-        hasDropdown: true
-    },
-    {
-        name: 'Documentation',
-        path: '/documentation',
-        icon: DocumentTextIcon,
-        current: computed(() => route.path === '/documentation'),
-        hasDropdown: false,
-        badge: 'New'
     },
 ];
 
 // Utiliser la navigation appropriée selon le rôle
+const isUtilisateur = computed(() =>
+    userStore.userData?.role?.toUpperCase() === 'UTILISATEUR'
+);
+
 const navigation = computed(() => {
+    if (isUtilisateur.value) return [];
     if (isAdministrateur.value) return administrateurNavigation;
     if (isVisiteurMedical.value) return visiteurMedicalNavigation;
-    return comptableNavigation;
+    if (isComptable.value) return comptableNavigation;
+    return [];
 });
+
 
 // Fonction pour obtenir les initiales de l'utilisateur
 const getUserInitials = computed(() => {

@@ -98,13 +98,6 @@ const toggleForm = (isLogin) => {
   <div class="w-full h-screen flex items-center justify-center p-4 bg-gray-50 relative">
     <div class="absolute inset-0 bg-pattern opacity-10"></div>
 
-    <div v-if="successMessage" class="absolute top-5 right-5 bg-indigo-600 text-white px-4 py-3 rounded-lg shadow-md z-50 flex items-center transition-all duration-300 transform hover:scale-105">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-      </svg>
-      {{ successMessage }}
-    </div>
-
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 max-w-lg w-full relative z-10 border border-indigo-100">
       <div class="pt-8 pb-4 flex flex-col items-center">
         <div class="w-20 h-20 rounded-full bg-indigo-600 flex items-center justify-center mb-4 shadow-lg">
@@ -122,15 +115,6 @@ const toggleForm = (isLogin) => {
             :class="!showLoginForm ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600 hover:text-indigo-500'">
             Inscription
           </button>
-        </div>
-
-        <div v-if="errorMessage" class="bg-red-50 border-l-4 border-indigo-500 text-indigo-700 p-4" role="alert">
-          <div class="flex">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <p>{{ errorMessage }}</p>
-          </div>
         </div>
 
         <div v-if="showLoginForm" class="p-6">
