@@ -137,10 +137,15 @@ async function traiterPaiement(id, action) {
   }
 }
 
+// Dans la fonction chargerDonnees(), ajoutez des logs et vérifications complètes
+
 async function chargerDonnees() {
   try {
     isLoading.value = true;
     error.value = null;
+
+    // Journal pour déboguer
+    console.log("Début de chargement des données");
 
     const response = await fetch(`http://51.83.76.210/gsb/api/loadFicheFrais.php`, {
       method: "POST",
@@ -148,29 +153,33 @@ async function chargerDonnees() {
       credentials: "include",
     });
 
+    console.log("Statut de la réponse:", response.status);
+
     if (!response.ok) {
       throw new Error(`Erreur HTTP: ${response.status}`);
     }
 
     const responseText = await response.text();
+    console.log("Réponse brute:", responseText);
 
     let data;
     try {
       data = JSON.parse(responseText);
+      console.log("Données analysées:", data);
     } catch (jsonError) {
       console.error("Erreur de décodage JSON:", responseText);
       throw new Error("Format de réponse invalide");
     }
 
     if (data.success) {
-      // Utiliser directement la structure de données
+      console.log("Fiches récupérées:", data.fiches);
       historiqueData.value = data.fiches;
     } else {
-      throw new Error(data.message || "Impossible de récupérer les données");
+      throw new Error(data.message);
     }
   } catch (err) {
     error.value = "Erreur de connexion au serveur: " + err.message;
-    console.error(err);
+    console.error("Erreur complète:", err);
   } finally {
     isLoading.value = false;
   }

@@ -41,22 +41,18 @@ try {
             statut
         FROM 
             fiche_frais
-        WHERE 
-            user_id = :userId
         ORDER BY 
             date DESC
     ");
 
-    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $stmt->execute();
-    
+
     $fiches = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     echo json_encode([
         'success' => true,
         'fiches' => $fiches
     ]);
-
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Erreur de base de données : ' . $e->getMessage()]);
@@ -64,4 +60,3 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
-?>

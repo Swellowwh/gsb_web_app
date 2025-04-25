@@ -72,11 +72,6 @@ router.beforeEach(async (to, from, next) => {
       return next('/login');
     }
 
-    // Chargement des infos utilisateur (si nécessaire)
-    if (!userData.value?.role) {
-      await userStore.fetchUser(); // à adapter à ton store
-    }
-
     const userRole = userData.value?.role?.toUpperCase() || '';
 
     const allowedRoles = to.meta.allowedRoles;

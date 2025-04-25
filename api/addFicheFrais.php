@@ -83,9 +83,10 @@ try {
     $checkStmt->execute();
 
     if ($checkStmt->fetchColumn() > 0) {
+        http_response_code(400); // Code 400 Bad Request
         echo json_encode([
             'success' => false,
-            'message' => "Une fiche de frais existe déjà pour le mois $mois"
+            'message' => "Vous ne pouvez créer qu'une fiche de frais par mois. Une fiche existe déjà pour le mois $mois"
         ]);
         exit;
     }
@@ -109,7 +110,6 @@ try {
     // Génération d'une référence unique
     $reference = 'FR-' . date('Ym') . '-' . sprintf('%04d', mt_rand(1, 9999));
 
-    // Début de la transaction
     $pdo->beginTransaction();
 
     try {
@@ -177,7 +177,7 @@ try {
         
         echo json_encode([
             'success' => true, 
-            'message' => 'Fiche de frais ajoutée avec succès',
+            'message' => 'Fiche de frais ajoutée avec succès !',
             'details' => [
                 'id' => $ficheId,
                 'reference' => $reference,
