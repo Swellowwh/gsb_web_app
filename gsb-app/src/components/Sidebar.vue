@@ -34,10 +34,14 @@ const isAdministrateur = computed(() =>
 const visiteurMedicalNavigation = [
     { name: 'Fiche de frais', path: '/frais', icon: BanknotesIcon, current: computed(() => route.path === '/frais'), hasDropdown: false },
     { name: 'Historique', path: '/historique', icon: CalendarIcon, current: computed(() => route.path === '/historique'), hasDropdown: false },
+    { name: 'Demander une avance', path: '/request-avance', icon: CalendarIcon, current: computed(() => route.path === '/request-avance'), hasDropdown: false },
+
 ];
 
 const comptableNavigation = [
     { name: 'Gestion des paiements', path: '/payments', icon: BanknotesIcon, current: computed(() => route.path === '/payments'), hasDropdown: false },
+    { name: 'Gestion des avances', path: '/avances', icon: BanknotesIcon, current: computed(() => route.path === '/avances'), hasDropdown: false },
+
 ];
 
 const administrateurNavigation = [

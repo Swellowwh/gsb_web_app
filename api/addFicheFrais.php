@@ -37,8 +37,8 @@ try {
     $nbRepas = isset($input['nbRepas']) ? intval($input['nbRepas']) : 0;
     $nbHebergements = isset($input['nbHebergements']) ? intval($input['nbHebergements']) : 0;
     $description = isset($input['description']) ? trim($input['description']) : '';
+    $avance_id = isset($input['avance_id']) && !empty($input['avance_id']) ? intval($input['avance_id']) : null;
 
-    // Validation de la date
     if (empty($date)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Le champ date est obligatoire']);
@@ -51,14 +51,12 @@ try {
         exit;
     }
 
-    // Validation des frais - au moins un type de frais doit être présent
     if ($distance <= 0 && $nbRepas <= 0 && $nbHebergements <= 0) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Au moins un type de frais (kilométrage, repas ou hébergement) doit être renseigné']);
         exit;
     }
 
-    // Validation de la description
     if (empty($description)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Le champ description est obligatoire']);
@@ -68,10 +66,8 @@ try {
     // Connexion à la base de données
     $pdo = Database::getInstance()->getPDO();
 
-    // Récupération du mois de la date
     $mois = date('Y-m', strtotime($date));
 
-    // Vérification si une fiche existe déjà pour ce mois
     $checkStmt = $pdo->prepare("
         SELECT COUNT(*) 
         FROM fiche_frais 
@@ -89,6 +85,41 @@ try {
             'message' => "Vous ne pouvez créer qu'une fiche de frais par mois. Une fiche existe déjà pour le mois $mois"
         ]);
         exit;
+    }
+
+    // Vérification de l'avance si fournie
+    if ($avance_id !== null) {
+        $avanceStmt = $pdo->prepare("
+            SELECT id_avance, montant, status 
+            FROM gsb_avance 
+            WHERE id_avance = :avance_id AND user_id = :userId AND status = 'accepted'
+        ");
+        $avanceStmt->bindParam(':avance_id', $avance_id, PDO::PARAM_INT);
+        $avanceStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $avanceStmt->execute();
+        
+        $avance = $avanceStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$avance) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'L\'avance sélectionnée n\'existe pas ou n\'est pas acceptée']);
+            exit;
+        }
+        
+        // Vérifier si l'avance est déjà utilisée dans une autre fiche de frais
+        $avanceUsedStmt = $pdo->prepare("
+            SELECT COUNT(*) 
+            FROM fiche_frais 
+            WHERE avance_id = :avance_id
+        ");
+        $avanceUsedStmt->bindParam(':avance_id', $avance_id, PDO::PARAM_INT);
+        $avanceUsedStmt->execute();
+        
+        if ($avanceUsedStmt->fetchColumn() > 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Cette avance est déjà utilisée dans une autre fiche de frais']);
+            exit;
+        }
     }
 
     // Récupération des taux
@@ -113,17 +144,16 @@ try {
     $pdo->beginTransaction();
 
     try {
-        // Insertion de l'entête de la fiche de frais
         $stmtFiche = $pdo->prepare("
-            INSERT INTO fiche_frais (reference, date, description, montant_total, user_id) 
-            VALUES (:reference, :date, :description, :montant_total, :userId)
-        ");
+            INSERT INTO fiche_frais (reference, date, description, montant_total, user_id, avance_id) 
+            VALUES (:reference, :date, :description, :montant_total, :userId, :avance_id)");
 
         $stmtFiche->bindParam(':reference', $reference, PDO::PARAM_STR);
         $stmtFiche->bindParam(':date', $date, PDO::PARAM_STR);
         $stmtFiche->bindParam(':description', $description, PDO::PARAM_STR);
         $stmtFiche->bindParam(':montant_total', $montantTotal, PDO::PARAM_STR);
         $stmtFiche->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmtFiche->bindParam(':avance_id', $avance_id, PDO::PARAM_INT);
 
         if (!$stmtFiche->execute()) {
             throw new Exception("Erreur lors de la création de la fiche de frais");
@@ -173,21 +203,48 @@ try {
             }
         }
 
+        // Mettre à jour le statut de l'avance à "used" si une avance est fournie
+        if ($avance_id !== null) {
+            // Mettre à jour l'avance en utilisant le nom correct de la colonne
+            $updateAvanceStmt = $pdo->prepare("
+                UPDATE gsb_avance 
+                SET status = 'used' 
+                WHERE id_avance = :avance_id AND user_id = :userId
+            ");
+            $updateAvanceStmt->bindParam(':avance_id', $avance_id, PDO::PARAM_INT);
+            $updateAvanceStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            
+            if (!$updateAvanceStmt->execute()) {
+                throw new Exception("Erreur lors de la mise à jour du statut de l'avance");
+            }
+        }
+
         $pdo->commit();
+        
+        // Préparer les détails de la réponse
+        $responseDetails = [
+            'id' => $ficheId,
+            'reference' => $reference,
+            'total' => $montantTotal,
+            'types' => [
+                'km' => $montantKm,
+                'repas' => $montantRepas,
+                'hebergement' => $montantHebergement
+            ]
+        ];
+        
+        // Ajouter les informations sur l'avance si utilisée
+        if ($avance_id !== null) {
+            $responseDetails['avance'] = [
+                'id' => $avance_id,
+                'montant' => isset($avance['montant']) ? floatval($avance['montant']) : 0
+            ];
+        }
         
         echo json_encode([
             'success' => true, 
             'message' => 'Fiche de frais ajoutée avec succès !',
-            'details' => [
-                'id' => $ficheId,
-                'reference' => $reference,
-                'total' => $montantTotal,
-                'types' => [
-                    'km' => $montantKm,
-                    'repas' => $montantRepas,
-                    'hebergement' => $montantHebergement
-                ]
-            ]
+            'details' => $responseDetails
         ]);
 
     } catch (Exception $e) {

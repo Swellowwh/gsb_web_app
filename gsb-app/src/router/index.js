@@ -48,6 +48,18 @@ const router = createRouter({
           name: 'Payments',
           component: () => import('../views/Payments.vue'),
           meta: { requiresAuth: true, allowedRoles: ['COMPTABLE', 'ADMINISTRATEUR'] }
+        },
+        {
+          path: '/request-avance',
+          name: 'request-avance',
+          component: () => import('../views/Request_Avance.vue'),
+          meta: { requiresAuth: true, allowedRoles: ['VISITEUR_MEDICAL', 'ADMINISTRATEUR'] }
+        }, 
+        {
+          path: '/avances',
+          name: 'avances',
+          component: () => import('../views/Avance.vue'),
+          meta: { requiresAuth: true, allowedRoles: ['COMPTABLE', 'ADMINISTRATEUR'] }
         },    
       ]
     },
